@@ -1,0 +1,515 @@
+---
+title: "Predictive capability"
+output: html_document
+---
+
+Comparing the predictive capability of the MNL and a random forest classifier
+
+Libraries
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+install.packages("knitr")
+install.packages("caTools")
+install.packages("ROCR")
+install.packages("caret")
+install.packages("ROSE")
+install.packages("rpart")
+install.packages("randomForest")
+install.packages("mlbench")
+install.packages("e1071")
+
+library(knitr)
+library(caTools)
+library(ROCR) 
+library(caret) 
+library(ROSE)
+library(rpart) 
+library(randomForest) 
+library(mlbench) 
+library(e1071)
+```
+
+1. Split into training and test set
+
+```{r}
+
+train_data_temp <- train_data
+test_data_temp<- test_data 
+
+set.seed(6) 
+train_index <- sample.split(Y = HH_dt_2_out$numcars , SplitRatio = 0.8)
+
+train_data <- HH_dt_2_out[train_index, ]
+test_data <- HH_dt_2_out[!train_index, ]
+
+```
+
+2. Create cv folds for crossvalidation process
+
+```{r}
+set.seed(1234)
+cv_folds <- createFolds(train_data$numcars, k = 5, returnTrain = TRUE)
+
+```
+
+
+3. Random Forest 
+
+3.1 Create base model
+```{r}
+
+df_rf <- HH_dt_2_out[,c("numcars","numlic","region2","income_numerical","quali_nv","CSyes","workers","CSmultiple","nummots1","triplength_avg","housing_type","quali_opnv","oldHH","parttime","hh_children","numped","tripsavg","metro28","train28","garage","bus28")]
+
+df_rf <- as.data.frame(df_rf)
+
+train_data2 <- df_rf[train_index, ]
+test_data2 <- df_rf[!train_index, ]
+
+ctrl <- caret::trainControl(method = "repeatedcv",
+                   number = 5,
+                   repeats=10,
+                   verboseIter = FALSE,
+                   summaryFunction = multiClassSummary,
+                   sampling = "down",
+                   index = cv_folds)
+
+set.seed(123)  
+fit_rf <- train(numcars ~ .,  data = train_data, method = "rf", ntree = 500, trControl = ctrl, trace = FALSE)
+
+fit_rf
+confusionMatrix(fit_rf)
+```
+
+
+3.2 Tune the random forest algorithm
+
+3.2.1 Tune number of trees (long runtime)
+
+```{r}
+ntrees1 <- c(10,25,50,100, 200, 500, 1000,1200) 
+
+set.seed(1234)
+
+ctrl6 <- trainControl(method = "oob",
+                     verboseIter = FALSE,
+                    summaryFunction = multiClassSummary)
+
+params1 <- expand.grid(ntrees = ntrees1)
+
+store_trees <- vector("list", nrow(params1))
+for(i in 1:nrow(params1)){
+  ntree <- params1[i,1]
+  set.seed(65)
+  rf_model <- train(numcars~.,
+                       data = df_rf,
+                       method = "rf",
+                       importance=FALSE,
+                       trControl = ctrl6,
+                       ntree = ntree)
+  store_trees[[i]] <- rf_model
+  print(i)
+}
+
+store_trees[[1]]$finalModel$err.rate
+
+```
+
+Create Tree plot
+```{r}
+#treesize
+
+#make df of treesizes and errors
+df_treesize = data.frame(matrix(vector(), 0, 2,
+                dimnames=list(c(), c("Number of trees", "OOB-error"))),
+                stringsAsFactors=F)
+
+df_treesize[1,] <- c(10,store_trees[[1]]$finalModel$err.rate[10])
+df_treesize[2,] <- c(25,store_trees[[2]]$finalModel$err.rate[25])
+df_treesize[3,] <- c(50,store_trees[[3]]$finalModel$err.rate[50])
+df_treesize[4,] <- c(100,store_trees[[4]]$finalModel$err.rate[100])
+df_treesize[5,] <- c(200,store_trees[[5]]$finalModel$err.rate[200])
+df_treesize[6,] <- c(500,store_trees[[6]]$finalModel$err.rate[500])
+df_treesize[7,] <- c(1000,store_trees[[7]]$finalModel$err.rate[1000])
+
+
+tree_plot <-ggplot(data=df_treesize, aes(x=Number.of.trees))+
+      geom_line(aes(y=OOB.error)) + 
+      ylab("Out-of-bag Error")+
+      xlab("Number of trees")+
+      ggtitle("")+
+      coord_fixed(ratio=5000)+
+      scale_x_continuous(limits=c(0,1000),breaks = c(0,250,500,750,1000))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+              axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+tree_plot
+
+savepdf2("treeplot")
+tree_plot
+dev.off()
+```
+
+3.2.2 Tune nodeSize and  the number of splitting variables simultaneously (long runtime)
+```{r}
+
+tuneGrid <- expand.grid(.mtry = c(2:33))
+
+#create tune control:
+ctrl4 <- trainControl(method = "repeatedcv",
+                     number = 5,
+                     repeats = 10,
+                     search = 'grid',
+                     verboseIter = FALSE,
+                     summaryFunction = multiClassSummary,
+                     sampling = "down",
+                     index = cv_folds)
+
+#Part1:
+nodesize <- c(1,3,5,7,9,10,20)
+params <- expand.grid(nodesize = nodesize)
+store_maxnode <- vector("list", nrow(params))
+
+for(i in 1:nrow(params)){
+  nodesize <- params[i,1]
+  set.seed(65)
+  rf_model <- train(numcars~.,
+                       data = train_data2,
+                       method = "rf",
+                       importance=FALSE,
+                       tuneGrid = tuneGrid,
+                       trControl = ctrl4,
+                       ntree = 500,
+                       nodesize = nodesize)
+  store_maxnode[[i]] <- rf_model
+  print(i)
+}
+
+#Part2:
+nodesize2 <- c(40,80,160,320,640)
+params2 <- expand.grid(nodesize = nodesize2)
+store_maxnode2 <- vector("list", nrow(params2))
+
+for(i in 1:nrow(params2)){
+  nodesize2 <- params2[i,1]
+  set.seed(65)
+  rf_model2 <- train(numcars~.,
+                       data = train_data2,
+                       method = "rf",
+                       importance=FALSE,
+                       tuneGrid = tuneGrid,
+                       trControl = ctrl4,
+                       ntree = 1000,
+                       nodesize = nodesize2)
+  store_maxnode2[[i]] <- rf_model2
+  print(i)
+}
+
+#To look at results for each mtry for each nodesize
+lapply(store_maxnode, print)
+lapply(store_maxnode2, print)
+
+```
+
+Create Nodesize plot to get a better understanding of the results
+```{r}
+
+df_mtry = data.frame(matrix(vector(), 0, 3,
+                dimnames=list(c(), c("nodesize", "mtry", "BalAcc"))),
+                stringsAsFactors=F)
+
+balacc1 <- store_maxnode[[1]]$results$Mean_Balanced_Accuracy
+balacc2 <- store_maxnode[[2]]$results$Mean_Balanced_Accuracy
+balacc3 <- store_maxnode[[3]]$results$Mean_Balanced_Accuracy
+balacc4 <- store_maxnode[[4]]$results$Mean_Balanced_Accuracy
+balacc5 <- store_maxnode[[5]]$results$Mean_Balanced_Accuracy
+balacc6 <- store_maxnode[[6]]$results$Mean_Balanced_Accuracy
+balacc7 <- store_maxnode[[7]]$results$Mean_Balanced_Accuracy
+balacc8 <- store_maxnode[[8]]$results$Mean_Balanced_Accuracy
+balacc9 <- store_maxnode[[9]]$results$Mean_Balanced_Accuracy
+balacc10 <- store_maxnode[[10]]$results$Mean_Balanced_Accuracy
+balacc20 <- store_maxnode[[11]]$results$Mean_Balanced_Accuracy
+balacc40 <- store_maxnode2[[1]]$results$Mean_Balanced_Accuracy
+balacc80 <- store_maxnode2[[2]]$results$Mean_Balanced_Accuracy
+balacc160 <- store_maxnode2[[3]]$results$Mean_Balanced_Accuracy
+balacc320 <- store_maxnode2[[4]]$results$Mean_Balanced_Accuracy
+balacc640 <- store_maxnode2[[5]]$results$Mean_Balanced_Accuracy
+
+
+mtry <- c(2:33)
+nodesize1 <- rep(1,32)
+nodesize3 <- rep(3,32)
+nodesize5 <- rep(5,32)
+nodesize7 <- rep(7,32)
+nodesize9 <-rep(9,32)
+nodesize10 <- rep(10,32)
+nodesize20 <- rep(20,32)
+nodesize40 <- rep(40,32)
+nodesize80 <- rep(80,32)
+nodesize160 <- rep(160,32)
+nodesize320 <- rep(320,32)
+nodesize640<- rep(640,32)
+
+df_mtry <- data.frame(nodesize=nodesize1, mtry, BalAcc=balacc1)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize3, mtry, BalAcc = balacc3),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize5, mtry, BalAcc = balacc5),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize7, mtry, BalAcc = balacc7),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize9, mtry, BalAcc = balacc9),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize10, mtry, BalAcc = balacc10),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize20, mtry, BalAcc = balacc20),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize40, mtry, BalAcc = balacc40),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize80, mtry, BalAcc = balacc80),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize160, mtry, BalAcc = balacc160),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize320, mtry, BalAcc = balacc320),names=FALSE)
+df_mtry <- rbind(df_mtry, data.frame(nodesize =nodesize640, mtry, BalAcc = balacc640),names=FALSE)
+
+df_mtry$nodesize <- factor(df_mtry$nodesize)
+
+RF_plot <-ggplot(data=df_mtry, aes(x=mtry, group=nodesize, colour=nodesize))+
+      geom_line(aes(y=BalAcc)) + 
+      ylab("Mean balanced Accuracy")+
+      xlab("Number of splitting variables")+
+      coord_fixed(ratio=170)+
+      labs(color = "Nodesize") +
+      ggtitle("")+
+      scale_y_continuous(limits=c(0.7,0.775))+
+      scale_x_continuous(limits=c(2,33), breaks=c(0,5,10,15,20,25,30,35))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              legend.position="bottom",
+              text=element_text(family="Times"),
+              axis.title = element_text(size = 12),
+              legend.title = element_text(size = 12),
+              legend.key.size = unit(0.7,"line"),
+        panel.grid.minor=element_blank())+
+        guides(colour = guide_legend(nrow = 1))+
+      scale_fill_grey()
+      
+RF_plot
+
+savepdf2("RFplot2")
+RF_plot
+dev.off()
+```
+
+
+3.3 Train Final RF model using all the data (long runtime) using the optimal parameters mtry = 15 and nodesize = 40
+```{r}
+
+ctrl_final <- trainControl(verboseIter = FALSE,
+                     summaryFunction = multiClassSummary,
+                     search = 'grid')
+
+tunegrid <- expand.grid(.mtry=c(15))
+
+set.seed(65)
+rf_model_final3 <- train(numcars~.,
+                       data = train_data2,
+                       method = "rf",
+                       tuneGrid = tuneGrid,
+                       importance=FALSE,
+                       trControl = ctrl_final,
+                       ntree = 500,
+                       nodesize = 40)
+
+#train set prediction (in-sample)
+predictions_final_trainrf = predict(rf_model_final3, newdata=train_data2, type = 'raw')
+cm_final_train2 <- confusionMatrix(train_data2$numcars, predictions_final_trainrf)
+
+balacc_final_rft2 <- mean(cm_final_train2[["byClass"]][ , "Balanced Accuracy"])
+sensitivity0_rft2 <- cm_final_train2[["byClass"]][ , "Balanced Accuracy"][1]
+sensitivity1_rft2 <- cm_final_train2[["byClass"]][ , "Balanced Accuracy"][2]
+sensitivity2_rft2 <- cm_final_train2[["byClass"]][ , "Balanced Accuracy"][3]
+sensitivity3_rft2 <- cm_final_train2[["byClass"]][ , "Balanced Accuracy"][4]
+kappa_rft2 <- cm_final_train2$overall['Kappa']
+
+#testset predictions (out-of-sample)
+predictions_final = predict(rf_model_final3, newdata=test_data2, type = 'raw')
+cm_final <- confusionMatrix(test_data2$numcars, predictions_final)
+cm_final
+
+balacc_final_rf <- mean(cm_final[["byClass"]][ , "Balanced Accuracy"])
+sensitivity0_rf <- cm_final[["byClass"]][ , "Balanced Accuracy"][1]
+sensitivity1_rf <- cm_final[["byClass"]][ , "Balanced Accuracy"][2]
+sensitivity2_rf <- cm_final[["byClass"]][ , "Balanced Accuracy"][3]
+sensitivity3_rf <- cm_final[["byClass"]][ , "Balanced Accuracy"][4]
+kappa_rf <- cm_final$overall['Kappa']
+
+
+```
+
+4. Train MNL model using all data (long runtime)
+```{r}
+
+fit_cv_temp <- fit_cv
+ctrl_final_mnl <- caret::trainControl(verboseIter = FALSE,
+                     summaryFunction = multiClassSummary)
+
+set.seed(65)
+fit_cv <- caret::train(numcars ~ numlic + region2 + income_numerical + I(numlic^2) + 
+    quali_nv + I(income_numerical^2) + CSyes + workers + CSmultiple + 
+    log(nummots1) + triplength_avg + housing_type + quali_opnv + 
+    I(triplength_avg^2) + oldHH + parttime + hh_children + numped + 
+    tripsavg + metro28 + train28 + garage + bus28 + I(parttime^2), data = train_data, method = "multinom", maxit=300, trControl = ctrl_final_mnl, trace = FALSE)
+
+#trainset predictions (in-sample)
+predictions_final_trainmnl2 = predict(fit_cv, newdata=train_data, type = 'raw')
+cm_final_trainmnl2 <- confusionMatrix(train_data$numcars, predictions_final_trainmnl2)
+cm_final_trainmnl2
+
+balacc_final_mnlt2 <- mean(cm_final_trainmnl2[["byClass"]][ , "Balanced Accuracy"])
+sensitivity0_mnlt2 <- cm_final_trainmnl2[["byClass"]][ , "Balanced Accuracy"][1]
+sensitivity1_mnlt2 <- cm_final_trainmnl2[["byClass"]][ , "Balanced Accuracy"][2]
+sensitivity2_mnlt2 <- cm_final_trainmnl2[["byClass"]][ , "Balanced Accuracy"][3]
+sensitivity3_mnlt2 <- cm_final_trainmnl2[["byClass"]][ , "Balanced Accuracy"][4]
+kappa_mnlt2 <- cm_final_trainmnl2$overall['Kappa']
+
+#testset predictions (out-of sample)
+predictions_final_mnl = predict(fit_cv, newdata=test_data, type = 'raw')
+cm_final_mnl <- confusionMatrix(test_data$numcars, predictions_final_mnl)
+cm_final_mnl
+balacc_final_mnl <- mean(cm_final_mnl[["byClass"]][ , "Balanced Accuracy"])
+sensitivity0_mnl <- cm_final_mnl[["byClass"]][ , "Balanced Accuracy"][1]
+sensitivity1_mnl <- cm_final_mnl[["byClass"]][ , "Balanced Accuracy"][2]
+sensitivity2_mnl <- cm_final_mnl[["byClass"]][ , "Balanced Accuracy"][3]
+sensitivity3_mnl <- cm_final_mnl[["byClass"]][ , "Balanced Accuracy"][4]
+kappa_mnl <- cm_final_mnl$overall['Kappa']
+
+
+```
+
+5. Make table comparing performances
+
+```{r}
+table_performance <- data.frame(matrix(vector(), 0, 6,
+                dimnames=list(c(), c("Measure","Specification", "train_RF","train_MNL","test_RF", "test_MNL"))),stringsAsFactors=F)
+
+table_performance[1,] <- c("Balanced Accuracy", "Overall", balacc_final_rft2, balacc_final_mnlt2,balacc_final_rf , balacc_final_mnl)
+
+table_performance[2,] <- c("Balanced Accuracy", "Zero cars", sensitivity0_rft2, sensitivity0_mnlt2,sensitivity0_rf , sensitivity0_mnl)
+
+table_performance[3,] <- c("Balanced Accuracy", "One car",sensitivity1_rft2, sensitivity1_mnlt2,sensitivity1_rf ,sensitivity1_mnl)
+
+table_performance[4,] <- c("Balanced Accuracy", "Two cars",sensitivity2_rft2, sensitivity2_mnlt2,sensitivity2_rf , sensitivity2_mnl)
+
+table_performance[5,] <- c("Balanced Accuracy", "Three and more cars", sensitivity3_rft2, sensitivity3_mnlt2,sensitivity3_rf , sensitivity3_mnl)
+
+table_performance[6,] <- c("Kappa", "Kappa", kappa_rft2, kappa_mnlt2,kappa_rf, kappa_mnl)
+
+table_performance$train_RF <- as.numeric(table_performance$train_RF)
+table_performance$train_MNL <- as.numeric(table_performance$train_MNL)
+table_performance$test_RF <- as.numeric(table_performance$test_RF)
+table_performance$test_MNL <- as.numeric(table_performance$test_MNL)
+
+is.num <- sapply(table_performance, is.numeric)
+table_performance[is.num] <- lapply(table_performance[is.num], round, 4)
+
+print(xtable(table_performance, type = "latex",digits=c(0,0,0,3,3,3,3)),include.rownames=FALSE, file = "table_predictions_part3.tex")
+```
+
+
+Compare variable importance and make table of comparisons
+
+```{r}
+
+#for MNL:
+# get coefficients
+importance_ml <- as.data.frame(coef(fit_new))
+importance_ml <- rownames_to_column(importance_ml)
+importance_ml1 <- importance_ml[1:38,]
+importance_ml2 <- importance_ml[39:76,]
+importance_ml3 <- importance_ml[77:114,]
+importance_ml_final <- data.frame(importance_ml1, importance_ml2, importance_ml3)
+importance_ml_final$rowname.1 <- NULL
+importance_ml_final$rowname.2 <- NULL
+colnames(importance_ml_final)<- c("Variable","One car","Two cars", "Three and more cars")
+importance_ml_final <- importance_ml_final[order(importance_ml_final$Variable),]
+importance_ml_final <- filter(importance_ml_final, Variable!= c("(Intercept):1"))
+importance_ml_final <- filter(importance_ml_final, Variable!= c("I(numlic^2):1"))
+importance_ml_final <- filter(importance_ml_final, Variable!= c("I(income_numerical^2):1"))
+importance_ml_final <- filter(importance_ml_final, Variable!= c("I(triplength_avg^2):1"))
+importance_ml_final <- filter(importance_ml_final, Variable!= c("I(workers^2):1"))
+importance_ml_final <- filter(importance_ml_final, Variable!= c("I(parttime^2):1"))
+
+#standard deviation of variables
+relevant_vars <- names(fit_new$model)[2:21]
+SD_df <- HH_dt_2_out[,relevant_vars, with=FALSE] 
+alloc.col(SD_df, 200)
+test_dummies <- fastDummies::dummy_cols(SD_df, remove_first_dummy = TRUE, remove_selected_columns = TRUE)
+test_dummies$nummots1 <- log(test_dummies$nummots1)
+names(test_dummies)[names(test_dummies) == 'nummots1'] <- 'log(nummots1)'
+variables_SD <- apply(test_dummies,2,sd)
+variables_SD <- as.data.frame(variables_SD)
+variables_SD <- rownames_to_column(variables_SD)
+variables_SD <- variables_SD[order(variables_SD$rowname),]
+
+# calculate standardized coefficients
+importance_f <- importance_ml_final
+result_importance <- data.frame(importance_f, variables_SD)
+result_importance$standardized_coef_1 <- abs(result_importance$One.car * result_importance$variables_SD)
+result_importance$standardized_coef_2 <- abs(result_importance$Two.cars * result_importance$variables_SD)
+result_importance$standardized_coef_3 <- abs(result_importance$Three.and.more.cars * result_importance$variables_SD)
+result_importance$standardized_coef_total <- result_importance$standardized_coef_1 + result_importance$standardized_coef_2 + result_importance$standardized_coef_3
+
+result_importance <- result_importance[order(result_importance$standardized_coef_total, decreasing=TRUE),]
+
+result_importance2<- data.frame(result_importance$rowname,result_importance$standardized_coef_total)
+colnames(result_importance2)<- c("rowname","Standardizedcoef")
+result_importance2$rank <- c(1:33)
+result_importance2$relimp <- result_importance2$Standardizedcoef/sum(result_importance2$Standardizedcoef)
+result_importance2$rowname<-  sub("_", "", result_importance2$rowname)
+result_importance2$rowname<-  sub("_", "", result_importance2$rowname)
+result_importance2$rowname[8] <- "nummots1"
+
+# for Random forest:
+# get variable importance from final algorithm
+
+importance2 <- varImp(rf_model_final3, scale=TRUE)$importance
+importance2 <- importance2[order(-importance2$Overall), , drop = FALSE]
+importance2$rank <- c(1:33)
+importance2$RelImp <- importance2$Overall/sum(importance2$Overall)
+
+importance2$MNL_name <- result_importance$rowname
+importance2$MNL <- result_importance$standardized_coef_total
+importance2$relImp_Mnl <- importance2$MNL/sum(importance2$MNL)
+importance2 <- rownames_to_column(importance2)
+
+table_importance <- importance2$rowname
+table_importance <- as.data.frame(table_importance)
+table_importance$table_importance<-  sub("_", "", table_importance$table_importance)
+colnames(table_importance)<- c("rowname")
+table_importance$RFrank <- importance2$rank
+table_importance$RFrelimp <- importance2$RelImp
+
+#merge with MNL results
+table_importance2 <- merge(table_importance, result_importance2, by="rowname")
+table_importance2 <- table_importance2[order(table_importance2$RFrank, decreasing=FALSE),]
+table_importance2$RFrelimp<- scales::percent(table_importance2$RFrelimp)
+table_importance2$relimp <- scales::percent(table_importance2$relimp)
+table_importance2$Standardizedcoef <- NULL
+colnames(table_importance2)[1] <- "Variable"
+table_importance2 <- rownames_to_column(table_importance2)
+table_importance2$rowname <- NULL
+
+# Rename variables
+table_importance2$Variable[table_importance2$Variable=="numlic"] <- "Number of Licenses"
+table_importance2$Variable[table_importance2$Variable=="incomenumerical"] <- "Income"
+table_importance2$Variable[table_importance2$Variable=="triplength_avg"] <- "Average triplength"
+table_importance2$Variable[table_importance2$Variable=="workers"] <- "Number of workers"
+table_importance2$Variable[table_importance2$Variable=="metro28rf"] <- "Metro: Distance really far"
+table_importance2$Variable[table_importance2$Variable=="numped"] <- "Number of bikes/pedelecs"
+table_importance2$Variable[table_importance2$Variable=="tripsavg"] <- "Average number of trips"
+table_importance2$Variable[table_importance2$Variable=="CSyes1"] <- "Carsharing available"
+
+#maketable in latex
+library(xtable)
+install.packages("xtable")
+print(xtable(table_importance2, type = "latex"), include.rownames=FALSE, file = "table_importance_part3.tex")
+
+```
+

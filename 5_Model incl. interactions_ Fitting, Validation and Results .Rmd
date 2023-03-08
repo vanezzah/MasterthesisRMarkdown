@@ -1,0 +1,717 @@
+---
+title: "Interaction model"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1. Calculate model including interaction terms with the variable "region2"
+
+Some variables with different levels, do not have observations for urban, suburban and rural environments for all levels. Missing observations in an interaction term can lead to unstable results, therefore, interaction terms are not included for these variables. This is the case for the variables capturing the distance to bus stations and metro stations, multiple carsharing subscriptions and the quality of public transport.
+
+```{r}
+dplyr::count(HH_dt_2_out, bus28, by = numcars, region2)
+dplyr::count(HH_dt_2_out, quali_opnv, by = numcars, region2)
+dplyr::count(HH_dt_2_out, CSmultiple, by = numcars, region2)
+dplyr::count(HH_dt_2_out, metro28, by = numcars, region2)
+
+```
+
+
+Nonlinear terms are added for all numerical variables
+```{r}
+
+
+fm_int <- formula(numcars ~ 1|region2 + numlic + I(numlic^2) + 
+    region2:numlic + region2:I(numlic^2) + income_numerical + 
+    I(income_numerical^2) + region2:income_numerical + region2:I(income_numerical^2)     +quali_nv + region2:quali_nv + CSyes + region2:CSyes + workers + 
+    I(workers^2) + region2:workers + region2:I(workers^2) + triplength_avg + 
+    I(triplength_avg^2) + region2:triplength_avg + region2:I(triplength_avg^2) + 
+    log(nummots1) + region2:log(nummots1) + housing_type + region2:housing_type + 
+    garage + region2:garage + quali_opnv + 
+    oldHH + region2:oldHH + CSmultiple + 
+    hh_children + region2:hh_children + metro28 + 
+    tripsavg + I(tripsavg^2) + region2:tripsavg + parttime + 
+    I(parttime^2) + region2:parttime + train28 + region2:train28 + 
+    numped + I(numped^2) + region2:numped + region2:I(numped^2) + 
+    bus28|1)
+
+fit_int <- mnlogit(fm_int, mnlogit_dt_out, ncores=4, choiceVar = "alt")
+```
+
+2. Coefficient table interaction model
+
+```{r}
+options(scipen = 999)
+
+summary_int <- summary(fit_int)
+coeffs_int <- summary_int$CoefTable
+coeffs_int <- as.data.frame(coeffs_int)
+coeffs_int <- rownames_to_column(coeffs_int)
+coeffs_int$`t-value` <- NULL
+
+coeffs_int1 <- coeffs_int[seq(1, 279, by=3),]
+coeffs_int2 <- coeffs_int[seq(2, 279, by=3),]
+coeffs_int3 <- coeffs_int[seq(3, 279, by=3),]
+
+coeffsint_total <- data.frame(coeffs_int1, coeffs_int2, coeffs_int3)
+coeffsint_total$rowname.1 <- NULL
+coeffsint_total$rowname.2 <- NULL
+
+coeffsint_total$rowname<-  sub(":1", "", coeffsint_total$rowname)
+coeffsint_total$rowname[coeffsint_total$rowname=="I(numlic^2)"] <- "licenses squared"
+coeffsint_total$rowname[coeffsint_total$rowname=="I(parttime^2)"] <- "parttime squared"
+coeffsint_total$rowname[coeffsint_total$rowname=="I(income_numerical^2)"] <- "income squared"
+coeffsint_total$rowname[coeffsint_total$rowname=="I(triplength_avg^2)"] <- "av.triplength squared"
+coeffsint_total$rowname[coeffsint_total$rowname=="log(nummots1)"] <- "motorbikes (log)"
+coeffsint_total$rowname[coeffsint_total$rowname=="I(numped^2)"] <- "numped squared"
+coeffsint_total$rowname[coeffsint_total$rowname=="I(workers^2)"] <- "workers squared"
+coeffsint_total$rowname[coeffsint_total$rowname=="I(tripsavg^2)"] <- "tripsavg squared"
+
+coeffsint_total$rowname[coeffsint_total$rowname=="numlic"] <- "licenses"
+coeffsint_total$rowname[coeffsint_total$rowname=="income_numerical"] <- "income"
+coeffsint_total$rowname[coeffsint_total$rowname=="triplength_avg"] <- "av.triplength"
+coeffsint_total$rowname[coeffsint_total$rowname=="workers"] <- "fulltime"
+coeffsint_total$rowname[coeffsint_total$rowname=="numped"] <- "bikes"
+coeffsint_total$rowname[coeffsint_total$rowname=="tripsavg"] <- "av.trips"
+coeffsint_total$rowname[coeffsint_total$rowname=="CSyes1"] <- "carsharing"
+coeffsint_total$rowname[coeffsint_total$rowname=="CSmultiple1"] <- "m.carsharing"
+coeffsint_total$rowname[coeffsint_total$rowname=="nummots"] <- "motorbikes"
+coeffsint_total$rowname[coeffsint_total$rowname=="parttime"] <- "parttime"
+coeffsint_total$rowname[coeffsint_total$rowname=="region2suburban"] <- "suburban"
+coeffsint_total$rowname[coeffsint_total$rowname=="region2rural"] <- "rural"
+coeffsint_total$rowname[coeffsint_total$rowname=="oldHH1"] <- "old"
+coeffsint_total$rowname[coeffsint_total$rowname=="hh_children1"] <- "children"
+coeffsint_total$rowname[coeffsint_total$rowname=="housing_typemultifamily_h"] <- "multifamily"
+coeffsint_total$rowname[coeffsint_total$rowname=="housing_typeapartmentbuilding"] <- "apartmentbuilding"
+coeffsint_total$rowname[coeffsint_total$rowname=="housing_typeother"] <- "other"
+coeffsint_total$rowname[coeffsint_total$rowname=="garage1"] <- "garage"
+
+coeffsint_total$rowname[coeffsint_total$rowname=="quali_nv2"] <- "ps.2"
+coeffsint_total$rowname[coeffsint_total$rowname=="quali_nv3"] <- "ps.3"
+coeffsint_total$rowname[coeffsint_total$rowname=="quali_nv4"] <- "ps.4"
+
+coeffsint_total$rowname[coeffsint_total$rowname=="quali_opnv2"] <- "pt.2"
+coeffsint_total$rowname[coeffsint_total$rowname=="quali_opnv3"] <- "pt.3"
+coeffsint_total$rowname[coeffsint_total$rowname=="quali_opnv4"] <- "pt.4"
+
+coeffsint_total$rowname[coeffsint_total$rowname=="bus28middle"] <- "bus.2"
+coeffsint_total$rowname[coeffsint_total$rowname=="bus28far"] <- "bus.3"
+coeffsint_total$rowname[coeffsint_total$rowname=="bus28rfar"] <- "bus.4"
+
+coeffsint_total$rowname[coeffsint_total$rowname=="metro28middle"] <- "metro.2"
+coeffsint_total$rowname[coeffsint_total$rowname=="metro28far"] <- "metro.3"
+coeffsint_total$rowname[coeffsint_total$rowname=="metro28rfar"] <- "metro.4"
+
+coeffsint_total$rowname <-  sub("region2suburban", "suburban", coeffsint_total$rowname)
+coeffsint_total$rowname <-  sub("region2rural", "rural", coeffsint_total$rowname)
+
+coeffsint_total$rowname <-  sub("train28rfar", "train.4", coeffsint_total$rowname)
+coeffsint_total$rowname <-  sub("train28far", "train.3", coeffsint_total$rowname)
+coeffsint_total$rowname <-  sub("train28middle", "train.2", coeffsint_total$rowname)
+
+coeffsint_total$rowname <-  sub("quali_nv4", "ps.4", coeffsint_total$rowname)
+coeffsint_total$rowname <-  sub("quali_nv3", "ps.3", coeffsint_total$rowname)
+coeffsint_total$rowname <-  sub("quali_nv2", "ps.2", coeffsint_total$rowname)
+
+colnames(coeffsint_total)<- c("Variable","Parameter","Std. Error", "Sig1.", "Parameter","Std. Error", "Sig2.", "Parameter","Std. Error", "Sig3.")
+
+for(i in 1:93) {
+  if (coeffsint_total$Sig1.[i] < 0.01) {
+    coeffsint_total$Sig1.[i] <- "***"
+  }
+  else if (coeffsint_total$Sig1.[i] < 0.05) {
+    coeffsint_total$Sig1.[i] <- "**"
+  }
+  else if (coeffsint_total$Sig1.[i] < 0.1) {
+    coeffsint_total$Sig1.[i] <- "*"
+  }
+  
+  else{
+    coeffsint_total$Sig1.[i] <- ""
+  }
+}
+
+for(i in 1:93) {
+  if (coeffsint_total$Sig2.[i] < 0.01) {
+    coeffsint_total$Sig2.[i] <- "***"
+  }
+  else if (coeffsint_total$Sig2.[i] < 0.05) {
+    coeffsint_total$Sig2.[i] <- "**"
+  }
+   else if (coeffsint_total$Sig2.[i] < 0.1) {
+    coeffsint_total$Sig2.[i] <- "*"
+   }
+  else{
+    coeffsint_total$Sig2.[i] <- ""
+  }
+}
+
+for(i in 1:93) {
+  if (coeffsint_total$Sig3.[i] < 0.01) {
+    coeffsint_total$Sig3.[i] <- "***"
+  }
+  else if (coeffsint_total$Sig3.[i] < 0.05) {
+    coeffsint_total$Sig3.[i] <- "**"
+  }
+   else if (coeffsint_total$Sig3.[i] < 0.1) {
+    coeffsint_total$Sig3.[i] <- "*"
+   }
+  else{
+    coeffsint_total$Sig3.[i] <- ""
+  }
+ }
+
+
+print(xtable(coeffsint_total, type = "latex",digits=c(0,0,3,3,0,3,3,0,3,3,0)),include.rownames=FALSE, file = "coeffsint_model.tex")
+```
+
+
+3. Model validation for the interaction model 
+```{r}
+# Waldtest
+waldtest(fit_int, fit_null)
+waldtest(fit_int, fit_new)
+
+#Scoretest (using mlogit)
+model_int <- mlogit(numcars ~1|region2 + numlic + I(numlic^2) + 
+    region2:numlic + region2:I(numlic^2) + income_numerical + 
+    I(income_numerical^2) + region2:income_numerical + region2:I(income_numerical^2)     +quali_nv + region2:quali_nv + CSyes + region2:CSyes + workers + 
+    I(workers^2) + region2:workers + region2:I(workers^2) + triplength_avg + 
+    I(triplength_avg^2) + region2:triplength_avg + region2:I(triplength_avg^2) + 
+    log(nummots1) + region2:log(nummots1) + housing_type + region2:housing_type + 
+    garage + region2:garage + quali_opnv + 
+    oldHH + region2:oldHH + CSmultiple + 
+    hh_children + region2:hh_children + metro28 + 
+    tripsavg + I(tripsavg^2) + region2:tripsavg + parttime + 
+    I(parttime^2) + region2:parttime + train28 + region2:train28 + 
+    numped + I(numped^2) + region2:numped + region2:I(numped^2) + 
+    bus28|1, data = mnlogit_dt_out)
+
+mlogit::scoretest(model2, model_int)
+mlogit::scoretest(model1, model_int)
+
+
+# Likelihood ratio test
+lrtest(fit_null, fit_int)
+lrtest(fit_new, fit_int)
+
+# AIC:
+AIC(fit_int)
+AIC(fit_new)
+AIC(fit_null)
+
+#Pseudo R-Squares
+LL0 <- logLik(fit_null)
+LL1 <- logLik(fit_int)
+N <- nrow(HH_dt_2_out)
+
+#mc fadden pseudo r2 
+mcfadden_int <- as.vector(1 - ((LL1) / (LL0)))
+
+# cox and snell r2 
+cox_int <- as.vector(1 - exp((2/N) * (LL0 - LL1)))
+
+# nagelkerke r2
+nagelkerke_int <- as.vector((1 - exp((2/N) * (LL0 - LL1))) / (1 - exp((2/N)*LL0)))
+
+```
+
+
+4. Fit the model again using the package multinom for further effect calculations
+
+```{r}
+multinom_int3 <-multinom(formula = numcars ~ region2 + numlic + I(numlic^2) + 
+    region2:numlic + region2:I(numlic^2) + income_numerical + 
+    I(income_numerical^2) + region2:income_numerical + region2:I(income_numerical^2) +     quali_nv + region2:quali_nv + CSyes + region2:CSyes + workers + 
+    I(workers^2) + region2:workers + region2:I(workers^2) + triplength_avg + 
+    I(triplength_avg^2) + region2:triplength_avg + region2:I(triplength_avg^2) + 
+    log(nummots1) + region2:log(nummots1) + housing_type + region2:housing_type + 
+    garage + region2:garage + quali_opnv + 
+    oldHH + region2:oldHH + CSmultiple + 
+    hh_children + region2:hh_children + metro28 + 
+    tripsavg + I(tripsavg^2) + region2:tripsavg + parttime + 
+    I(parttime^2) + region2:parttime + train28 + region2:train28 + 
+    numped + I(numped^2) + region2:numped + region2:I(numped^2) + 
+    bus28, data = HH_dt_2_out, maxit = 700)
+```
+
+
+5. Calculations of AMEs for interaction effects
+
+```{r}
+
+library(margins)
+
+test_margins0 <- margins(multinom_int3, variables=c("numlic","income_numerical","CSyes", "workers", "parttime", "hh_children", "oldHH", "garage", "numped", "triplength_avg","quali_nv", "housing_type", "train28"), data = data.frame(HH_dt_2_out), at = list("region2"=c("urban", "suburban", "rural")), category = "0")
+
+test_margins1 <- margins(multinom_int3, variables=c("numlic","income_numerical","CSyes", "workers", "parttime", "hh_children", "oldHH", "garage", "numped", "triplength_avg", "quali_nv", "housing_type", "train28"), data = data.frame(HH_dt_2_out), at = list("region2"=c("urban", "suburban", "rural")), category = "1")
+
+test_margins2 <- margins(multinom_int3, variables=c("numlic","income_numerical","CSyes", "workers", "parttime", "hh_children", "oldHH", "garage", "numped", "triplength_avg", "quali_nv", "housing_type", "train28"), data = data.frame(HH_dt_2_out), at = list("region2"=c("urban", "suburban", "rural")), category = "2")
+
+test_margins3 <- margins(multinom_int3, variables=c("numlic","income_numerical","CSyes", "workers", "parttime", "hh_children", "oldHH", "garage", "numped", "triplength_avg", "quali_nv", "housing_type", "train28"), data = data.frame(HH_dt_2_out), at = list("region2"=c("urban", "suburban", "rural")), category = "3")
+
+test_margins0_df <- as.data.frame(summary(test_margins0))
+test_margins0_df[,3:7] <- NULL
+test_margins0_df <- reshape(test_margins0_df, idvar = "factor", timevar = "region2", direction = "wide")
+
+test_margins1_df <- as.data.frame(summary(test_margins1))
+test_margins1_df[,4:8] <- NULL
+test_margins1_df <- reshape(test_margins1_df, idvar = "factor", timevar = "region2", direction = "wide")
+
+test_margins2_df <- as.data.frame(summary(test_margins2))
+test_margins2_df[,4:8] <- NULL
+test_margins2_df <- reshape(test_margins2_df, idvar = "factor", timevar = "region2", direction = "wide")
+
+test_margins3_df <- as.data.frame(summary(test_margins3))
+test_margins3_df[,4:8] <- NULL
+test_margins3_df <- reshape(test_margins3_df, idvar = "factor", timevar = "region2", direction = "wide")
+
+margins_total <- cbind(test_margins0_df, test_margins1_df, test_margins2_df, test_margins3_df)
+margins_total[,c(5,9,13)] <- NULL
+
+print(xtable(margins_total, type = "latex", digits=c(0,0,3,3,3,3,3,3,3,3,3,3,3,3)), include.rownames=FALSE, file = "margins_int.tex")
+
+```
+
+6. Testing if AMEs are significantly different between reginos (in addition to confidence intervals in plots)
+
+Preparations
+
+```{r}
+#variables with only one coefficient
+names_numint <- names_num[c(1,2,3,4,6,7,8,9,10,11,12)]
+#variables with several coefficients
+names_catint <- names_cat[c(1,2,5)]
+```
+
+6.1 Tests for average marginal effects regarding the probability to own zero cars
+```{r}
+# test significance of differences in interaction effects between regions: 
+
+AME_test0 <- as.matrix(data.frame(t(c("name","pvalue1", "pvalue2", "pvalue3"))))
+
+  for(i in names_numint){
+  tempurb <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "urban"], multinom_int3,variables= i,category = "0") 
+  mean_urb <- mean(tempurb[,1])
+  tempsub <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "suburban"], multinom_int3,variables= i,category = "0")  
+  mean_sub <- mean(tempsub[,1])
+  temprur <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "rural"], multinom_int3,variables= i,category = "0")  
+  mean_rur <- mean(temprur[,1])
+  
+  testa <- wilcox.test(tempurb[,1],tempsub[,1], paired = FALSE)
+  testb <- wilcox.test(tempurb[,1],temprur[,1], paired = FALSE)
+  testc <- wilcox.test(tempsub[,1],temprur[,1], paired = FALSE)
+  
+  res1 = round(mean_urb - mean_sub,3)
+  if(testa$p.value < 0.01) 
+  {res1 = paste0(res1,"**")}
+  else if (testa$p.value < 0.05) 
+  {res1 = paste0(res1,"*")}
+  
+  res2 = round(mean_urb - mean_rur,3)
+  if(testb$p.value < 0.01) 
+  {res2 = paste0(res2,"**")}
+  else if (testa$p.value < 0.05) 
+  {res2 = paste0(res2,"*")}
+  
+  res3 = round(mean_sub - mean_rur,3)
+  if(testc$p.value < 0.01) 
+  {res3 = paste0(res3,"**")}
+  else if (testa$p.value < 0.05) 
+  {res3 = paste0(res3, "*")}
+  
+  w <- c(i, res1, res2, res3)
+  AME_test0 <- insertRow(AME_test0,1,w)
+  }
+
+
+for(i in names_catint){
+  tempurb <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "urban"], multinom_int3,variables= i,category = "0")  
+  mean_urb <- mean(tempurb[,1])
+  mean_urb2<- mean(tempurb[,2])
+  mean_urb3 <- mean(tempurb[,3])
+  tempsub <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "suburban"], multinom_int3,variables= i,category = "0")  
+  mean_sub <- mean(tempsub[,1])
+  mean_sub2<- mean(tempsub[,2])
+  mean_sub3<- mean(tempsub[,3])
+  temprur <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "rural"], multinom_int3,variables= i,category = "0")  
+  mean_rur <- mean(temprur[,1])
+  mean_rur2<- mean(temprur[,2])
+  mean_rur3<- mean(temprur[,3])
+  
+  testa <- wilcox.test(tempurb[,1],tempsub[,1], paired = FALSE)
+  testb <- wilcox.test(tempurb[,1],temprur[,1], paired = FALSE)
+  testc <- wilcox.test(tempsub[,1],temprur[,1], paired = FALSE)
+  
+  testa2 <- wilcox.test(tempurb[,2],tempsub[,2], paired = FALSE)
+  testb2 <- wilcox.test(tempurb[,2],temprur[,2], paired = FALSE)
+  testc2 <- wilcox.test(tempsub[,2],temprur[,2], paired = FALSE)
+  
+  testa3 <- wilcox.test(tempurb[,3],tempsub[,3], paired = FALSE)
+  testb3 <- wilcox.test(tempurb[,3],temprur[,3], paired = FALSE)
+  testc3 <- wilcox.test(tempsub[,3],temprur[,3], paired = FALSE)
+  
+  res1 = round(mean_urb - mean_sub,3)
+  if(testa$p.value < 0.01) 
+  {res1 = paste0(round(mean_urb - mean_sub,3),"*")}
+  res2 = round(mean_urb - mean_rur,3)
+  if(testb$p.value < 0.01) 
+  {res2 = paste0(round(mean_urb - mean_rur,3),"*")}
+  res3 = round(mean_sub - mean_rur,3)
+  if(testc$p.value < 0.01) 
+  {res3 = paste0(round(mean_sub - mean_rur,3),"*")}
+  
+    res1a = round(mean_urb2 - mean_sub2,3)
+  if(testa2$p.value < 0.01) 
+  {res1a = paste0(round(mean_urb2 - mean_sub2,3),"*")}
+  res2a = round(mean_urb2 - mean_rur2,3)
+  if(testb2$p.value < 0.01) 
+  {res2a = paste0(round(mean_urb2 - mean_rur2,3),"*")}
+  res3a = round(mean_sub2 - mean_rur2,3)
+  if(testc2$p.value < 0.01) 
+  {res3a = paste0(round(mean_sub2 - mean_rur2,3),"*")}
+  
+    res1b = round(mean_urb3 - mean_sub3,3)
+  if(testa3$p.value < 0.01) 
+  {res1b = paste0(round(mean_urb3 - mean_sub3,3),"*")}
+  res2b = round(mean_urb3 - mean_rur3,3)
+  if(testb3$p.value < 0.01) 
+  {res2b = paste0(round(mean_urb3 - mean_rur3,3),"*")}
+  res3b = round(mean_sub3 - mean_rur3,3)
+  if(testc3$p.value < 0.01) 
+  {res3b = paste0(round(mean_sub3 - mean_rur3,3),"*")}
+  
+  w <- c(i, res1, res2, res3)
+  w2 <- c(i,res1a, res2a, res3a)
+  w3 <- c(i,res1b, res2b, res3b)
+  
+  AME_test0 <- insertRow(AME_test0,1,w)
+  AME_test0 <- insertRow(AME_test0,1,w2)
+  AME_test0 <- insertRow(AME_test0,1,w3)
+}
+
+```
+
+6.2 Tests for average marginal effects regarding the probability to own one car
+```{r}
+
+AME_test1 <- as.matrix(data.frame(t(c("name","pvalue1", "pvalue2", "pvalue3"))))
+
+  for(i in names_numint){
+  tempurb <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "urban"], multinom_int3,variables= i,category = "1") 
+  mean_urb <- mean(tempurb[,1])
+  tempsub <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "suburban"], multinom_int3,variables= i,category = "1")  
+  mean_sub <- mean(tempsub[,1])
+  temprur <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "rural"], multinom_int3,variables= i,category = "1")  
+  mean_rur <- mean(temprur[,1])
+  
+  testa <- wilcox.test(tempurb[,1],tempsub[,1], paired = FALSE)
+  testb <- wilcox.test(tempurb[,1],temprur[,1], paired = FALSE)
+  testc <- wilcox.test(tempsub[,1],temprur[,1], paired = FALSE)
+  
+  res1 = round(mean_urb - mean_sub,3)
+  if(testa$p.value < 0.01) 
+  {res1 = paste0(res1,"**")}
+  else if (testa$p.value < 0.05) 
+  {res1 = paste0(res1,"*")}
+  
+  res2 = round(mean_urb - mean_rur,3)
+  if(testb$p.value < 0.01) 
+  {res2 = paste0(res2,"**")}
+  else if (testa$p.value < 0.05) 
+  {res2 = paste0(res2,"*")}
+  
+  res3 = round(mean_sub - mean_rur,3)
+  if(testc$p.value < 0.01) 
+  {res3 = paste0(res3,"**")}
+  else if (testa$p.value < 0.05) 
+  {res3 = paste0(res3, "*")}
+  
+  w <- c(i, res1, res2, res3)
+  AME_test1 <- insertRow(AME_test1,1,w)
+  }
+
+
+for(i in names_catint){
+  tempurb <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "urban"], multinom_int3,variables= i,category = "1")  
+  mean_urb <- mean(tempurb[,1])
+  mean_urb2<- mean(tempurb[,2])
+  mean_urb3 <- mean(tempurb[,3])
+  tempsub <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "suburban"], multinom_int3,variables= i,category = "1")  
+  mean_sub <- mean(tempsub[,1])
+  mean_sub2<- mean(tempsub[,2])
+  mean_sub3<- mean(tempsub[,3])
+  temprur <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "rural"], multinom_int3,variables= i,category = "1")  
+  mean_rur <- mean(temprur[,1])
+  mean_rur2<- mean(temprur[,2])
+  mean_rur3<- mean(temprur[,3])
+  
+  testa <- wilcox.test(tempurb[,1],tempsub[,1], paired = FALSE)
+  testb <- wilcox.test(tempurb[,1],temprur[,1], paired = FALSE)
+  testc <- wilcox.test(tempsub[,1],temprur[,1], paired = FALSE)
+  
+  testa2 <- wilcox.test(tempurb[,2],tempsub[,2], paired = FALSE)
+  testb2 <- wilcox.test(tempurb[,2],temprur[,2], paired = FALSE)
+  testc2 <- wilcox.test(tempsub[,2],temprur[,2], paired = FALSE)
+  
+  testa3 <- wilcox.test(tempurb[,3],tempsub[,3], paired = FALSE)
+  testb3 <- wilcox.test(tempurb[,3],temprur[,3], paired = FALSE)
+  testc3 <- wilcox.test(tempsub[,3],temprur[,3], paired = FALSE)
+  
+  res1 = round(mean_urb - mean_sub,3)
+  if(testa$p.value < 0.01) 
+  {res1 = paste0(round(mean_urb - mean_sub,3),"*")}
+  res2 = round(mean_urb - mean_rur,3)
+  if(testb$p.value < 0.01) 
+  {res2 = paste0(round(mean_urb - mean_rur,3),"*")}
+  res3 = round(mean_sub - mean_rur,3)
+  if(testc$p.value < 0.01) 
+  {res3 = paste0(round(mean_sub - mean_rur,3),"*")}
+  
+    res1a = round(mean_urb2 - mean_sub2,3)
+  if(testa2$p.value < 0.01) 
+  {res1a = paste0(round(mean_urb2 - mean_sub2,3),"*")}
+  res2a = round(mean_urb2 - mean_rur2,3)
+  if(testb2$p.value < 0.01) 
+  {res2a = paste0(round(mean_urb2 - mean_rur2,3),"*")}
+  res3a = round(mean_sub2 - mean_rur2,3)
+  if(testc2$p.value < 0.01) 
+  {res3a = paste0(round(mean_sub2 - mean_rur2,3),"*")}
+  
+    res1b = round(mean_urb3 - mean_sub3,3)
+  if(testa3$p.value < 0.01) 
+  {res1b = paste0(round(mean_urb3 - mean_sub3,3),"*")}
+  res2b = round(mean_urb3 - mean_rur3,3)
+  if(testb3$p.value < 0.01) 
+  {res2b = paste0(round(mean_urb3 - mean_rur3,3),"*")}
+  res3b = round(mean_sub3 - mean_rur3,3)
+  if(testc3$p.value < 0.01) 
+  {res3b = paste0(round(mean_sub3 - mean_rur3,3),"*")}
+  
+  w <- c(i, res1, res2, res3)
+  w2 <- c(i,res1a, res2a, res3a)
+  w3 <- c(i,res1b, res2b, res3b)
+  
+  AME_test1 <- insertRow(AME_test1,1,w)
+  AME_test1 <- insertRow(AME_test1,1,w2)
+  AME_test1 <- insertRow(AME_test1,1,w3)
+}
+
+```
+
+6.3 Tests for average marginal effects regarding the probability to two cars
+```{r}
+
+AME_test2 <- as.matrix(data.frame(t(c("name","pvalue1", "pvalue2", "pvalue3"))))
+
+  for(i in names_numint){
+  tempurb <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "urban"], multinom_int3,variables= i,category = "2") 
+  mean_urb <- mean(tempurb[,1])
+  tempsub <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "suburban"], multinom_int3,variables= i,category = "2")  
+  mean_sub <- mean(tempsub[,1])
+  temprur <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "rural"], multinom_int3,variables= i,category = "2")  
+  mean_rur <- mean(temprur[,1])
+  
+  testa <- wilcox.test(tempurb[,1],tempsub[,1], paired = FALSE)
+  testb <- wilcox.test(tempurb[,1],temprur[,1], paired = FALSE)
+  testc <- wilcox.test(tempsub[,1],temprur[,1], paired = FALSE)
+  
+  res1 = round(mean_urb - mean_sub,3)
+  if(testa$p.value < 0.01) 
+  {res1 = paste0(res1,"**")}
+  else if (testa$p.value < 0.05) 
+  {res1 = paste0(res1,"*")}
+  
+  res2 = round(mean_urb - mean_rur,3)
+  if(testb$p.value < 0.01) 
+  {res2 = paste0(res2,"**")}
+  else if (testa$p.value < 0.05) 
+  {res2 = paste0(res2,"*")}
+  
+  res3 = round(mean_sub - mean_rur,3)
+  if(testc$p.value < 0.01) 
+  {res3 = paste0(res3,"**")}
+  else if (testa$p.value < 0.05) 
+  {res3 = paste0(res3, "*")}
+  
+  w <- c(i, res1, res2, res3)
+  AME_test2 <- insertRow(AME_test2,1,w)
+  }
+
+
+for(i in names_catint){
+  tempurb <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "urban"], multinom_int3,variables= i,category = "2")  
+  mean_urb <- mean(tempurb[,1])
+  mean_urb2<- mean(tempurb[,2])
+  mean_urb3 <- mean(tempurb[,3])
+  tempsub <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "suburban"], multinom_int3,variables= i,category = "2")  
+  mean_sub <- mean(tempsub[,1])
+  mean_sub2<- mean(tempsub[,2])
+  mean_sub3<- mean(tempsub[,3])
+  temprur <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "rural"], multinom_int3,variables= i,category = "2")  
+  mean_rur <- mean(temprur[,1])
+  mean_rur2<- mean(temprur[,2])
+  mean_rur3<- mean(temprur[,3])
+  
+  testa <- wilcox.test(tempurb[,1],tempsub[,1], paired = FALSE)
+  testb <- wilcox.test(tempurb[,1],temprur[,1], paired = FALSE)
+  testc <- wilcox.test(tempsub[,1],temprur[,1], paired = FALSE)
+  
+  testa2 <- wilcox.test(tempurb[,2],tempsub[,2], paired = FALSE)
+  testb2 <- wilcox.test(tempurb[,2],temprur[,2], paired = FALSE)
+  testc2 <- wilcox.test(tempsub[,2],temprur[,2], paired = FALSE)
+  
+  testa3 <- wilcox.test(tempurb[,3],tempsub[,3], paired = FALSE)
+  testb3 <- wilcox.test(tempurb[,3],temprur[,3], paired = FALSE)
+  testc3 <- wilcox.test(tempsub[,3],temprur[,3], paired = FALSE)
+  
+  res1 = round(mean_urb - mean_sub,3)
+  if(testa$p.value < 0.01) 
+  {res1 = paste0(round(mean_urb - mean_sub,3),"*")}
+  res2 = round(mean_urb - mean_rur,3)
+  if(testb$p.value < 0.01) 
+  {res2 = paste0(round(mean_urb - mean_rur,3),"*")}
+  res3 = round(mean_sub - mean_rur,3)
+  if(testc$p.value < 0.01) 
+  {res3 = paste0(round(mean_sub - mean_rur,3),"*")}
+  
+    res1a = round(mean_urb2 - mean_sub2,3)
+  if(testa2$p.value < 0.01) 
+  {res1a = paste0(round(mean_urb2 - mean_sub2,3),"*")}
+  res2a = round(mean_urb2 - mean_rur2,3)
+  if(testb2$p.value < 0.01) 
+  {res2a = paste0(round(mean_urb2 - mean_rur2,3),"*")}
+  res3a = round(mean_sub2 - mean_rur2,3)
+  if(testc2$p.value < 0.01) 
+  {res3a = paste0(round(mean_sub2 - mean_rur2,3),"*")}
+  
+    res1b = round(mean_urb3 - mean_sub3,3)
+  if(testa3$p.value < 0.01) 
+  {res1b = paste0(round(mean_urb3 - mean_sub3,3),"*")}
+  res2b = round(mean_urb3 - mean_rur3,3)
+  if(testb3$p.value < 0.01) 
+  {res2b = paste0(round(mean_urb3 - mean_rur3,3),"*")}
+  res3b = round(mean_sub3 - mean_rur3,3)
+  if(testc3$p.value < 0.01) 
+  {res3b = paste0(round(mean_sub3 - mean_rur3,3),"*")}
+  
+  w <- c(i, res1, res2, res3)
+  w2 <- c(i,res1a, res2a, res3a)
+  w3 <- c(i,res1b, res2b, res3b)
+  
+  AME_test2 <- insertRow(AME_test2,1,w)
+  AME_test2 <- insertRow(AME_test2,1,w2)
+  AME_test2 <- insertRow(AME_test2,1,w3)
+}
+```
+
+6.4 Tests for average marginal effects regarding the probability to own three or more cars
+
+```{r}
+
+AME_test3 <- as.matrix(data.frame(t(c("name","pvalue1", "pvalue2", "pvalue3"))))
+
+  for(i in names_numint){
+  tempurb <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "urban"], multinom_int3,variables= i,category = "3") 
+  mean_urb <- mean(tempurb[,1])
+  tempsub <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "suburban"], multinom_int3,variables= i,category = "3")  
+  mean_sub <- mean(tempsub[,1])
+  temprur <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "rural"], multinom_int3,variables= i,category = "3")  
+  mean_rur <- mean(temprur[,1])
+  
+  testa <- wilcox.test(tempurb[,1],tempsub[,1], paired = FALSE)
+  testb <- wilcox.test(tempurb[,1],temprur[,1], paired = FALSE)
+  testc <- wilcox.test(tempsub[,1],temprur[,1], paired = FALSE)
+  
+  res1 = round(mean_urb - mean_sub,3)
+  if(testa$p.value < 0.01) 
+  {res1 = paste0(res1,"**")}
+  else if (testa$p.value < 0.05) 
+  {res1 = paste0(res1,"*")}
+  
+  res2 = round(mean_urb - mean_rur,3)
+  if(testb$p.value < 0.01) 
+  {res2 = paste0(res2,"**")}
+  else if (testa$p.value < 0.05) 
+  {res2 = paste0(res2,"*")}
+  
+  res3 = round(mean_sub - mean_rur,3)
+  if(testc$p.value < 0.01) 
+  {res3 = paste0(res3,"**")}
+  else if (testa$p.value < 0.05) 
+  {res3 = paste0(res3, "*")}
+  
+  w <- c(i, res1, res2, res3)
+  AME_test3 <- insertRow(AME_test3,1,w)
+  }
+
+
+for(i in names_catint){
+  tempurb <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "urban"], multinom_int3,variables= i,category = "3")  
+  mean_urb <- mean(tempurb[,1])
+  mean_urb2<- mean(tempurb[,2])
+  mean_urb3 <- mean(tempurb[,3])
+  tempsub <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "suburban"], multinom_int3,variables= i,category = "3")  
+  mean_sub <- mean(tempsub[,1])
+  mean_sub2<- mean(tempsub[,2])
+  mean_sub3<- mean(tempsub[,3])
+  temprur <- marginal_effects(data = HH_dt_2_out[HH_dt_2_out$region2 == "rural"], multinom_int3,variables= i,category = "3")  
+  mean_rur <- mean(temprur[,1])
+  mean_rur2<- mean(temprur[,2])
+  mean_rur3<- mean(temprur[,3])
+  
+  testa <- wilcox.test(tempurb[,1],tempsub[,1], paired = FALSE)
+  testb <- wilcox.test(tempurb[,1],temprur[,1], paired = FALSE)
+  testc <- wilcox.test(tempsub[,1],temprur[,1], paired = FALSE)
+  
+  testa2 <- wilcox.test(tempurb[,2],tempsub[,2], paired = FALSE)
+  testb2 <- wilcox.test(tempurb[,2],temprur[,2], paired = FALSE)
+  testc2 <- wilcox.test(tempsub[,2],temprur[,2], paired = FALSE)
+  
+  testa3 <- wilcox.test(tempurb[,3],tempsub[,3], paired = FALSE)
+  testb3 <- wilcox.test(tempurb[,3],temprur[,3], paired = FALSE)
+  testc3 <- wilcox.test(tempsub[,3],temprur[,3], paired = FALSE)
+  
+  res1 = round(mean_urb - mean_sub,3)
+  if(testa$p.value < 0.01) 
+  {res1 = paste0(round(mean_urb - mean_sub,3),"*")}
+  res2 = round(mean_urb - mean_rur,3)
+  if(testb$p.value < 0.01) 
+  {res2 = paste0(round(mean_urb - mean_rur,3),"*")}
+  res3 = round(mean_sub - mean_rur,3)
+  if(testc$p.value < 0.01) 
+  {res3 = paste0(round(mean_sub - mean_rur,3),"*")}
+  
+    res1a = round(mean_urb2 - mean_sub2,3)
+  if(testa2$p.value < 0.01) 
+  {res1a = paste0(round(mean_urb2 - mean_sub2,3),"*")}
+  res2a = round(mean_urb2 - mean_rur2,3)
+  if(testb2$p.value < 0.01) 
+  {res2a = paste0(round(mean_urb2 - mean_rur2,3),"*")}
+  res3a = round(mean_sub2 - mean_rur2,3)
+  if(testc2$p.value < 0.01) 
+  {res3a = paste0(round(mean_sub2 - mean_rur2,3),"*")}
+  
+    res1b = round(mean_urb3 - mean_sub3,3)
+  if(testa3$p.value < 0.01) 
+  {res1b = paste0(round(mean_urb3 - mean_sub3,3),"*")}
+  res2b = round(mean_urb3 - mean_rur3,3)
+  if(testb3$p.value < 0.01) 
+  {res2b = paste0(round(mean_urb3 - mean_rur3,3),"*")}
+  res3b = round(mean_sub3 - mean_rur3,3)
+  if(testc3$p.value < 0.01) 
+  {res3b = paste0(round(mean_sub3 - mean_rur3,3),"*")}
+  
+  w <- c(i, res1, res2, res3)
+  w2 <- c(i,res1a, res2a, res3a)
+  w3 <- c(i,res1b, res2b, res3b)
+  
+  AME_test3 <- insertRow(AME_test3,1,w)
+  AME_test3 <- insertRow(AME_test3,1,w2)
+  AME_test3 <- insertRow(AME_test3,1,w3)
+}
+```
+

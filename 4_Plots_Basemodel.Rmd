@@ -1,0 +1,720 @@
+---
+title: "Plot"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+Function to save plots to pdf
+```{r}
+install.packages('ggpubr')
+library(ggpubr)
+
+savepdf <- function(file, width=16, height=6)
+{
+  fname <- paste(file,".pdf",sep="")
+  pdf(fname, width=width/2.54, height=height/2.54,
+      pointsize=10)
+  par(mgp=c(2.2,0.45,0), tcl=-0.4, mar=c(3.3,3.6,1.1,1.1))
+}
+
+savepdf4 <- function(file, width=16.5, height=7)
+{
+  fname <- paste(file,".pdf",sep="")
+  pdf(fname, width=width/2.54, height=height/2.54,
+      pointsize=10)
+  par(mgp=c(2.2,0.45,0), tcl=-0.4, mar=c(3.3,3.6,1.1,1.1))
+}
+
+
+savepdf5 <- function(file, width=18, height=6)
+{
+  fname <- paste(file,".pdf",sep="")
+  pdf(fname, width=width/2.54, height=height/2.54,
+      pointsize=10)
+  par(mgp=c(2.2,0.45,0), tcl=-0.4, mar=c(3.3,3.6,1.1,1.1))
+}
+
+savepdf6 <- function(file, width=16, height=8)
+{
+  fname <- paste(file,".pdf",sep="")
+  pdf(fname, width=width/2.54, height=height/2.54,
+      pointsize=10)
+  par(mgp=c(2.2,0.45,0), tcl=-0.4, mar=c(3.3,3.6,1.1,1.1))
+}
+```
+
+1. Compute effects for plots using the effects package
+```{r}
+e33 = effect("numlic", fit_multinom_v3)
+e33 <- as.data.frame(e33)
+
+e111 = effect("triplength_avg", fit_multinom_v3)
+e111 = as.data.frame(e111)
+e2222 = effect("income_numerical", fit_multinom_v3, xlevels = 20)
+e2222 = as.data.frame(e2222)
+e44 = effect("tripsavg", fit_multinom_v3)
+e44 <- as.data.frame(e44)
+
+e55 = effect("log(nummots1)", fit_multinom_v3)
+e55 <- as.data.frame(e55)
+e66 = effect("numped", fit_multinom_v3)
+e66 <- as.data.frame(e66)
+
+e100 =  effect("workers", fit_multinom_v3, xlevels=4)
+e100 <- as.data.frame(e100)
+e1111 =effect("parttime", fit_multinom_v3, xlevels =4)
+e1111 <- as.data.frame(e1111)
+
+e144 = effect("CSyes", fit_multinom_v3)
+e144 <- as.data.frame(e144)
+e155 = effect("CSmultiple", fit_multinom_v3)
+e155 <- as.data.frame(e155)
+
+
+e133 = effect("oldHH", fit_multinom_v3)
+e133 <- as.data.frame(e133)
+e244 = effect("hh_children", fit_multinom_v3)
+e244 <- as.data.frame(e244)
+
+
+e177 = effect("bus28", fit_multinom_v3)
+e177 <- as.data.frame(e177)
+e188 = effect("metro28", fit_multinom_v3)
+e188 <- as.data.frame(e188)
+e199 = effect("train28", fit_multinom_v3)
+e199 <- as.data.frame(e199)
+
+e200 = effect("housing_type",fit_multinom_v3)
+e200 <- as.data.frame(e200)
+e211 = effect("garage", fit_multinom_v3)
+e211<- as.data.frame(e211)
+e166 = effect("region2", fit_multinom_v3)
+e166 <- as.data.frame(e166)
+
+e222 = effect("quali_opnv", fit_multinom_v3)
+e222 <- as.data.frame(e222)
+e233 = effect("quali_nv", fit_multinom_v3)
+e233 <- as.data.frame(e233)
+
+```
+
+
+2. Make effect plots with ggplot2
+
+2.1 Number of licenses and monthly income
+```{r}
+
+numlic_plot <-ggplot(data=e33, aes(x=numlic))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Number of licensed drivers")+
+      ggtitle("Licenses")+
+      labs(color = "Number of cars owned:") +
+      scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+              axis.title = element_text(size = 12),
+              legend.title = element_text(size = 10),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+```
+2.2 Income
+```{r}
+
+income_plot <-ggplot(data=e2222, aes(x=income_numerical))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Monthly Income in Thousands")+
+      ggtitle("Income")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=9)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        legend.position = "bottom",
+        text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+income_plot
+
+
+figure_incnum <- ggarrange(numlic_plot, income_plot,common.legend = TRUE, legend = "right", vjust=6,hjust=-0.6, ncol = 2, nrow = 1, align="h")
+
+savepdf("numlic")
+annotate_figure(figure_incnum)
+dev.off()
+
+```
+2.3 Carsharing
+
+```{r}
+CS1_plot <-ggplot(data=e144, aes(x=CSyes, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("One carsharing subsciption")+
+      ggtitle("Carsharing")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+                text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+CS2_plot <-ggplot(data=e155, aes(x=CSmultiple, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Multiple carsharing subscriptions")+
+      ggtitle("M.carsharing")+
+      labs(color = "Number of cars owned:") +
+     scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        legend.position = "bottom",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+figure_CS <- ggarrange(CS1_plot,CS2_plot, common.legend = TRUE, legend = "right",
+          ncol = 2, nrow = 1)
+
+savepdf("CS")
+annotate_figure(figure_CS)
+dev.off()
+
+```
+
+
+
+2.4 Tripsavg and triplength_avg
+
+```{r}
+
+
+trips_plot <-ggplot(data=e44, aes(x=tripsavg))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Average number of trips")+
+      ggtitle("Av. trips")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=8)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_continuous(limits=c(0,8))+
+  scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+                   text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+triplength_plot <-ggplot(data=e111, aes(x=triplength_avg))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Average trip length in km")+
+      ggtitle("Av. triplength")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=33)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      scale_x_continuous(limits=c(0,33))+
+  scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+                   text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        legend.position = "bottom",
+        plot.margin=unit(c(0,0,0,0),"pt"),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+
+figure_trips <- ggarrange(triplength_plot,trips_plot, common.legend = TRUE, legend = "right", vjust=6, align = "v",
+          ncol = 2, nrow = 1)
+
+annotate_figure(figure_trips)
+
+savepdf("trips")
+annotate_figure(figure_trips)
+dev.off()
+
+
+
+```
+
+2.5 Full-time and part-time workers
+
+```{r}
+
+workers_plot <-ggplot(data=e100, aes(x=workers))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Number of full-time workers")+
+      ggtitle("Full-time")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+        scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        legend.position = "bottom",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+workers_plot
+
+parttime_plot <-ggplot(data=e1111, aes(x=parttime))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Number of part-time workers")+
+      ggtitle("Part-time")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+        scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        legend.position = "bottom",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+
+figure_workers <- ggarrange(workers_plot, parttime_plot,common.legend = TRUE, legend = "right",
+          ncol = 2, nrow = 1)
+
+
+annotate_figure(figure_workers)
+
+savepdf("workers")
+annotate_figure(figure_workers)
+dev.off()
+```
+
+2.6 Households with children and households with older age compositions
+
+```{r}
+
+children_plot <-ggplot(data=e244, aes(x=hh_children, group = 1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Household with children")+
+      ggtitle("Children")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+              scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),    
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        #axis.text.x = element_text(angle=45, hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+old_plot <-ggplot(data=e133, aes(x=oldHH, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Prevailing household generation")+
+      ggtitle("Generation")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+              scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      scale_x_discrete(limits=c("0","1"),labels = c("0" = "Gen. Y and Z", "1" = "Gen. X+"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+                  text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+             # axis.text.x = element_text(angle=45, hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+share2_plot
+
+
+figure_chidold<- ggarrange(children_plot, old_plot,common.legend = TRUE, legend = "right", vjust=2,
+          ncol = 2, nrow = 1, align = "h")
+
+
+
+annotate_figure(figure_chidold)
+
+savepdf("chid")
+annotate_figure(figure_chidold)
+dev.off()
+
+```
+
+2.7 Number of bikes and number of motorbikes
+
+
+```{r}
+numped_plot <-ggplot(data=e66, aes(x=numped))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Number of bikes / pedelecs")+
+      ggtitle("Bikes")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=10)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      scale_x_continuous(limits=c(0,10), breaks = c(0,2,4,6,8,10))+
+      scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+nummots_plot <-ggplot(data=e55, aes(x=nummots1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Number of motorbikes / mopeds")+
+      ggtitle("Motorbikes")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+       scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+figure_pedmots<- ggarrange(numped_plot, nummots_plot,common.legend = TRUE, legend = "right", vjust=6,
+          ncol = 2, nrow = 1)
+
+
+annotate_figure(figure_pedmots)
+
+savepdf("ped")
+annotate_figure(figure_pedmots)
+dev.off()
+```
+
+
+2.8 Distance to train, bus and metro stations
+```{r}
+train_plot <-ggplot(data=e199, aes(x=train28, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Train")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=3)+
+scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+       scale_x_discrete(labels = c("near" = "< 0.5 km", "middle"="0.5 - 2.5 km","far"="2.5 - 5 km", "rfar" = "> 5 km"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        axis.text.x = element_text(angle=45, hjust=1), 
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+bus_plot <-ggplot(data=e177, aes(x=bus28, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("Bus")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+       scale_x_discrete(labels = c("near" = "< 0.5 km", "middle"="0.5 - 2.5 km","far"="2.5 - 5 km", "rfar" = "> 5 km"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        axis.text.x = element_text(angle=45, hjust=1), 
+        legend.position = "bottom",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+bus_plot
+
+metro_plot <-ggplot(data=e188, aes(x=metro28, group = 1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Metro")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+   scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      scale_x_discrete(labels = c("near" = "< 0.5 km", "middle"="0.5 - 2.5 km","far"="2.5 - 5 km", "rfar" = "> 5 km"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        axis.text.x = element_text(angle=45, hjust=1),     
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+figure_bus<- ggarrange(bus_plot, metro_plot,train_plot,common.legend = TRUE, legend = c("none"), vjust=4,
+          ncol = 3, nrow = 1) %>% gridExtra::grid.arrange(get_legend(bus_plot), heights = unit(c(60, 5), "mm"))
+
+
+annotate_figure(figure_bus,
+                left = text_grob("Predicted Probability", color = "black", rot = 90, family = "Times", size="12", hjust=0.2),
+                bottom=text_grob("Distance to next station in km", color="black",vjust=-10,family = "Times", size="12")
+)
+
+savepdf4("bus")
+annotate_figure(figure_bus,
+                bottom=text_grob("Distance to next station in km", color="black",vjust=-3.5,family = "Times", size="12")
+)
+dev.off()
+```
+
+
+2.9 Housing type and the availability of a garage
+
+```{r}
+
+region_plot <-ggplot(data=e166, aes(x=region2, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Regional area")+
+      ggtitle("Region")+
+      labs(color = "Number of cars owned") +
+      coord_fixed(ratio=2.25)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      scale_x_discrete(labels = c("urban" = "Urban", "suburban" = "Suburban","rural"= "Rural"))+
+  scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        legend.position="bottom",
+        text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        axis.text.x = element_text(angle=45, hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+housing_plot <-ggplot(data=e200, aes(x=housing_type, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Type of housing")+
+      ggtitle("Housing")+
+      labs(color = "Number of cars owned") +
+      coord_fixed(ratio=2.25)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+   scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      scale_x_discrete(limits = c("singlefamily_h", "multifamily_h", "apartmentbuilding"), labels = c("singlefamily_h" = "Single-family home", "multifamily_h" = "Multi-family home","apartmentbuilding" = "Apartment"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+garage_plot <-ggplot(data=e211, aes(x=garage, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Availability of a garage")+
+      ggtitle("Garage")+
+      labs(color = "Number of cars owned") +
+      coord_fixed(ratio=1.5)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+  scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+              legend.position = "bottom",
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        axis.text.x = element_text(angle=45, hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+figure_housing<- ggarrange(housing_plot, garage_plot,region_plot, common.legend=TRUE,legend=c("none"),align="h",
+          ncol = 3, nrow = 1)
+
+annotate_figure(figure_housing)
+
+savepdf4("housing")
+annotate_figure(figure_housing)
+dev.off()
+
+
+```
+
+2.10 Quality of public services and public transport
+
+```{r}
+qualinv_plot <-ggplot(data=e233, aes(x=quali_nv, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Quality of public services")+
+      ggtitle("Public Services")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+       scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+qualiopnv_plot <-ggplot(data=e222, aes(x=quali_opnv, group=1))+
+      geom_line(aes(y=prob.X0, color="Zero cars")) + 
+      geom_line(aes(y=prob.X1, color="One car")) + 
+      geom_line(aes(y=prob.X2, color ="Two cars"))+
+      geom_line(aes(y=prob.X3, color ="Three or more cars"))+
+      ylab("Predicted Probability")+
+      xlab("Quality of public transport")+
+      ggtitle("Public transport")+
+      labs(color = "Number of cars owned:") +
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+       scale_color_manual(values = c("#e08f62", "#c70039", "#70af85","#111d5e"), breaks = c("Zero cars", "One car","Two cars", "Three or more cars"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+figure_quali<- ggarrange(qualinv_plot, qualiopnv_plot,common.legend = TRUE, legend = "right", vjust=6,ncol = 2, nrow = 1)
+
+
+annotate_figure(figure_quali)
+
+savepdf("quality")
+annotate_figure(figure_quali)
+dev.off()
+```
+
+
+
+
+
+
+
+

@@ -1,0 +1,1696 @@
+---
+title: "Plots Interactions"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1. Calculation of effects for plots
+```{r}
+
+ef22 <- effect("region2:numlic", multinom_int3)
+ef22 <- as.data.frame(ef22)
+
+
+ef33 <- effect("region2:income_numerical", multinom_int3)
+ef33 <- as.data.frame(ef33)
+
+
+ef44 <- effect("region2:CSyes", multinom_int3)
+ef44 <- as.data.frame(ef44)
+
+
+ef111 <- effect("region2:quali_nv", multinom_int3) 
+ef111 <- as.data.frame(ef111)
+ef55 <- effect("region2:workers", multinom_int3)
+ef55 <- as.data.frame(ef55)
+ef122 <- effect("region2:parttime", multinom_int3)
+ef122 <- as.data.frame(ef122)
+
+ef66 <- effect("region2:triplength_avg", multinom_int3) 
+ef66 <- as.data.frame(ef66)
+ef77 <- effect("region2:oldHH", multinom_int3) 
+ef77 <- as.data.frame(ef77)
+ef88 <- effect("region2:hh_children", multinom_int3) 
+ef88 <- as.data.frame(ef88)
+
+
+ef99 <- effect("region2:numped", multinom_int3) 
+ef99 <- as.data.frame(ef99)
+ef133 <- effect("region2:housing_type", multinom_int3) 
+ef133 <- as.data.frame(ef133)
+ef199 <- effect("region2:garage", multinom_int3) 
+ef199 <- as.data.frame(ef199)
+
+ef155 <- effect("region2:train28", multinom_int3) 
+ef155 <- as.data.frame(ef155)
+
+ef177 <- effect("region2:tripsavg", multinom_int3) 
+ef177 <- as.data.frame(ef177)
+
+ef188 <- effect("region2:log(nummots1)", multinom_int3) 
+ef188 <- as.data.frame(ef188)
+```
+
+
+2. Plots with ggplot2
+
+For every variable four plots are generated, where each plots compares the effects for changes over the variables value span for urban, suburban and rural households. 
+Confidence intervals are shown in the plots in order to be able to see if differences between regions are significant.
+
+2.1 Number of licenses
+```{r}
+#library(ggplot2)
+
+#numlic 
+Plot.numlic0<-ggplot(data=ef22, aes(x=numlic, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=L.prob.X0, ymax=U.prob.X0),linetype=0,alpha=.2)+
+       ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("Zero cars")+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=4)+
+  scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+Plot.numlic1<-ggplot(data=ef22, aes(x=numlic, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=L.prob.X1, ymax=U.prob.X1),linetype=0,alpha=.2)+
+       ylab("")+
+      xlab("")+
+      ggtitle("One car")+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=4)+
+  scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+Plot.numlic2<-ggplot(data=ef22, aes(x=numlic, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=L.prob.X2, ymax=U.prob.X2),linetype=0,alpha=.2)+
+       ylab("")+
+      xlab("")+
+      ggtitle("Two cars")+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+     coord_fixed(ratio=4)+
+  scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+Plot.numlic3<-ggplot(data=ef22, aes(x=numlic, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      geom_ribbon(aes(ymin=L.prob.X3, ymax=U.prob.X3),linetype=0,alpha=.2)+
+       ylab("")+
+      xlab("")+
+      ggtitle("Three + cars")+
+      labs(color = "Region:") +
+      coord_fixed(ratio=4)+
+    scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+              legend.direction = "horizontal", 
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.numlic3
+
+```
+
+```{r}
+
+figure_numlic <- ggarrange(Plot.numlic0, Plot.numlic1, Plot.numlic2,Plot.numlic3,common.legend = TRUE, legend = "none",
+          ncol = 4, nrow = 1)%>% gridExtra::grid.arrange(get_legend(Plot.numlic3), heights = unit(c(50, 5), "mm"))
+
+annotate_figure(figure_numlic,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Number of license holders", vjust = -12.5,family = "Times", size="12"),
+)
+
+savepdf("numlic_int")
+annotate_figure(figure_numlic,
+                bottom = text_grob("Number of license holders", vjust = -4,family = "Times", size="12"),
+)
+dev.off()
+
+```
+
+2.2 Income numerical
+
+```{r}
+
+Plot.income0 <-ggplot(data=ef33, aes(x=income_numerical, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype=0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("Zero cars")+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=10)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.income0
+
+Plot.income1 <-ggplot(data=ef33, aes(x=income_numerical, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype=0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("One car")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=10)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.income1
+
+Plot.income2 <-ggplot(data=ef33, aes(x=income_numerical, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype=0)+
+      ylab("")+
+      xlab("")+
+  labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ggtitle("Two cars")+
+      coord_fixed(ratio=10)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.income2
+
+
+Plot.income3 <-ggplot(data=ef33, aes(x=income_numerical, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype=0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+  labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=10)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+            legend.direction = "horizontal",  
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.income3
+
+```
+
+```{r}
+
+figure_income <- ggarrange(Plot.income0, Plot.income1, Plot.income2,Plot.income3,common.legend = TRUE, legend = "none",
+          ncol = 4, nrow = 1)%>% gridExtra::grid.arrange(get_legend(Plot.income3), heights = unit(c(50, 5), "mm"))
+
+annotate_figure(figure_income,
+                #top = text_grob("Monthly income and region as predictors of car ownership", color = "black", size =                   14, vjust=5),
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12"),
+                bottom = text_grob("Monthly Income in Thousands", vjust=-9,family = "Times", size="12"),
+)
+
+savepdf("inc_int")
+annotate_figure(figure_income,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Monthly Income in Thousands", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+
+
+```
+
+2.3 Quality of public services
+```{r}
+
+library(ggplot2)
+Plot.qualinv1 <-ggplot(data=ef111, aes(x=quali_nv, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+      ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("Zero cars")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=13.33)+
+      scale_y_continuous(limits=c(0,0.3),breaks = c(0.1,0.2,0.3))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.qualinv1
+
+Plot.qualinv2 <-ggplot(data=ef111, aes(x=quali_nv, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      labs(color = "Region.") +
+      ylab("")+
+      xlab("")+
+      ggtitle("One car")+
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.qualinv2
+
+Plot.qualinv3 <-ggplot(data=ef111, aes(x=quali_nv, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+     labs(color = "Region:") +
+      ylab("")+
+      xlab("")+
+      ggtitle("Two cars")+
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.qualinv3
+
+Plot.qualinv4 <-ggplot(data=ef111, aes(x=quali_nv, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+      ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+      coord_fixed(ratio=13.33)+
+      scale_y_continuous(limits=c(0,0.3),breaks = c(0.1,0.2,0.3))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              legend.direction = "horizontal",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.qualinv4
+```
+
+```{r}
+library(ggpubr)
+library(dplyr)
+library(gpubr)
+
+figure <- ggarrange(Plot.qualinv1, Plot.qualinv2, Plot.qualinv3,Plot.qualinv4, common.legend = TRUE, legend = "none", vjust=8,
+          ncol = 4, nrow = 1) %>% gridExtra::grid.arrange(get_legend(Plot.numlic3), heights = unit(c(50, 5), "mm"))
+
+annotate_figure(figure,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Quality of public services", vjust=-5,family = "Times", size="12"),
+)
+
+savepdf("ps_int")
+annotate_figure(figure,
+                bottom = text_grob("Quality of public services", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+
+```
+
+
+2.4 One carsharing subscription
+```{r}
+#CSyes
+Plot.cs0 <-ggplot(data=ef44, aes(x=CSyes, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("Zero cars")+
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4,0.5))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank(),aspect.ratio=1)+
+      scale_fill_grey()
+Plot.cs0
+
+Plot.cs1 <-ggplot(data=ef44, aes(x=CSyes, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      ylab("")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      xlab("")+
+      ggtitle("One car")+
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.cs1
+
+
+Plot.cs2 <-ggplot(data=ef44, aes(x=CSyes, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("Two cars")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.cs2
+
+Plot.cs3<-ggplot(data=ef44, aes(x=CSyes, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+  labs(color = "Region:")+
+      ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+      scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4,0.5))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              legend.direction = "horizontal",
+        panel.grid.minor=element_blank(), aspect.ratio=1)+
+      scale_fill_grey()
+Plot.cs3
+```
+
+```{r}
+figure_car <- ggarrange(Plot.cs0, Plot.cs1, Plot.cs2,common.legend = TRUE, legend = "none", vjust=8,
+          ncol = 3, nrow = 1)%>%gridExtra::grid.arrange(get_legend(Plot.numlic3), heights = unit(c(50, 5), "mm"))
+
+figure_car <- ggarrange(Plot.cs0, Plot.cs1, Plot.cs2,Plot.cs3,common.legend = TRUE, legend = "none", vjust=8,
+          ncol = 4, nrow = 1)%>%gridExtra::grid.arrange(get_legend(Plot.cs3), heights = unit(c(50, 5), "mm"))
+
+annotate_figure(figure_car,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Carsharing Subscription", vjust=-9,family = "Times", size="12"),
+)
+
+savepdf("cs_int")
+annotate_figure(figure_car,
+                bottom = text_grob("One carsharing subscription", vjust=-3.5,family = "Times", size="12"),
+)
+dev.off()
+
+savepdf("cs_int_4")
+annotate_figure(figure_car,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("One carsharing subscription", vjust=-4,family = "Times", size="12"),)
+dev.off()
+
+
+
+```
+
+2.5 Full-time workers
+```{r}
+#CSyes
+Plot.work0 <-ggplot(data=ef55, aes(x=workers, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("Zero cars")+
+      scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4))+
+  coord_fixed(ratio=6)+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.work0
+
+Plot.work1 <-ggplot(data=ef55, aes(x=workers, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("One car")+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  coord_fixed(ratio=3)+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.work1
+
+Plot.work2 <-ggplot(data=ef55, aes(x=workers, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ggtitle("Two cars")+
+  coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.work2
+
+Plot.work3<-ggplot(data=ef55, aes(x=workers, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+  labs(color = "Region:")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              legend.direction = "horizontal",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.work3
+```
+
+```{r}
+figure_work <- ggarrange(Plot.work1, Plot.work2, Plot.work3,common.legend = TRUE, legend = "none",vjust=3,
+          ncol = 3, nrow = 1)%>% gridExtra::grid.arrange(get_legend(Plot.numlic3), heights = unit(c(60, 5), "mm"))
+
+figure_work <- ggarrange(Plot.work0, Plot.work1, Plot.work2, Plot.work3,common.legend = TRUE, legend = "none",vjust=3,
+          ncol = 4, nrow = 1)%>% gridExtra::grid.arrange(get_legend(Plot.numlic3), heights = unit(c(50, 5), "mm"))
+
+
+annotate_figure(figure_work,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Number of fulltime workers", vjust=-4,family = "Times", size="12"),
+)
+
+savepdf("fulltime_int")
+annotate_figure(figure_work,
+                bottom = text_grob("Number of full-time workers", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+```
+
+2.6 Part-time workers
+
+```{r}
+Plot.parttime1 <-ggplot(data=ef122, aes(x=parttime, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("Zero cars")+
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              legend.direction = "horizontal",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+Plot.parttime2 <-ggplot(data=ef122, aes(x=parttime, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("One car")+
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              legend.direction = "horizontal",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+Plot.parttime3 <-ggplot(data=ef122, aes(x=parttime, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+     labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Two cars")+
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              legend.direction = "horizontal",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+Plot.parttime4 <-ggplot(data=ef122, aes(x=parttime, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              legend.direction = "horizontal",
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+```
+
+```{r}
+figure_parttime <- ggarrange(Plot.parttime1,Plot.parttime2, Plot.parttime3,Plot.parttime4, common.legend = TRUE, legend = "none",vjust=3,
+          ncol = 4, nrow = 1)%>% gridExtra::grid.arrange(get_legend(Plot.numlic3), heights = unit(c(50, 5), "mm"))
+
+annotate_figure(figure_parttime,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Number of parttime workers", vjust=-4,family = "Times", size="12"),
+)
+
+savepdf("parttime_int")
+annotate_figure(figure_parttime,
+                bottom = text_grob("Number of part-time workers", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+```
+
+2.7 Average trip length
+```{r}
+Plot.trip0 <-ggplot(data=ef66, aes(x=triplength_avg, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+       ylab("")+
+      xlab("")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ggtitle("Zero cars")+
+      coord_fixed(ratio=30)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.trip0
+
+Plot.trip1 <-ggplot(data=ef66, aes(x=triplength_avg, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+       ylab("")+
+      xlab("")+
+      ggtitle("One car")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=30)+
+      labs(color = "Region:") +
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+Plot.trip2 <-ggplot(data=ef66, aes(x=triplength_avg, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+       ylab("")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      xlab("")+
+      ggtitle("Two cars")+
+      coord_fixed(ratio=30)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+#Plot.trip2
+
+Plot.trip3<-ggplot(data=ef66, aes(x=triplength_avg, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+       ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=30)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.trip3
+
+```
+
+```{r}
+figure_trip <- ggarrange(Plot.trip1, Plot.trip2, common.legend = TRUE, legend = "right", vjust=5,
+          ncol = 2, nrow = 1)
+
+figure_trip <- ggarrange(Plot.trip0,Plot.trip1, Plot.trip2, Plot.trip3,common.legend = TRUE, legend = "none",vjust=3,
+          ncol = 4, nrow = 1) %>% gridExtra::grid.arrange(get_legend(Plot.work3), heights = unit(c(50, 5), "mm"))
+
+
+annotate_figure(figure_trip,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Average trip length in km", vjust=-4,family = "Times", size="12"),
+)
+
+savepdf("tripl_int")
+annotate_figure(figure_trip,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Average trip length in km", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+```
+
+2.8 Generation / older age composition
+
+```{r}
+Plot.share0 <-ggplot(data=ef77, aes(x=oldHH, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      labs(color = "Region:")+
+       ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("Zero cars")+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4))+
+scale_x_discrete(limits=c("0","1"),labels = c("0" = "Gen. Y / Z", "1" = "Gen. X+"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        #axis.text.x = element_text(angle=45, hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+#Plot.share0
+
+Plot.share1 <-ggplot(data=ef77, aes(x=oldHH, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      labs(color = "region") +
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+       ylab("")+
+      xlab("")+
+      ggtitle("One car")+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+scale_x_discrete(limits=c("0","1"),labels = c("0" = "Gen. Y / Z", "1" = "Gen. X+"))+  
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+#Plot.share1
+
+Plot.share2 <-ggplot(data=ef77, aes(x=oldHH, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) +
+      labs(color = "Region:")+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+       ylab("")+
+      xlab("")+
+      ggtitle("Two cars")+
+      coord_fixed(ratio=2)+
+scale_x_discrete(limits=c("0","1"),labels = c("0" = "Gen. Y / Z", "1" = "Gen. X+"))+    scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        #axis.text.x = element_text(angle=45, hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+Plot.share3<-ggplot(data=ef77, aes(x=oldHH, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      labs(color = "region")+
+      ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=4)+
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+      labs(color = "region")+
+scale_x_discrete(limits=c("0","1"),labels = c("0" = "Gen. Y / Z", "1" = "Gen. X+"))+     scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4))+
+      #scale_x_continuous(limits=c(0,1),breaks = c(0.5))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        #axis.text.x = element_text(angle=45, hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.share3
+```
+
+```{r}
+
+figure_share <- ggarrange(Plot.share0,Plot.share1, Plot.share2, Plot.share3,common.legend = TRUE, legend = "none",vjust=3,
+          ncol = 4, nrow = 1) %>% gridExtra::grid.arrange(get_legend(Plot.numlic3), heights = unit(c(50, 5), "mm"))
+
+figure_share <- ggarrange(Plot.share0, Plot.share1, Plot.share2, common.legend = TRUE, legend = "none", vjust=5,
+          ncol = 3, nrow = 1)%>% gridExtra::grid.arrange(get_legend(Plot.numlic3), heights = unit(c(50, 5), "mm"))
+
+
+annotate_figure(figure_share,
+                left = text_grob("Predicted Probability", color = "black", rot = 90, family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Prevailing household age", vjust=-9,family = "Times", size="12"),
+)
+
+savepdf("age_int")
+annotate_figure(figure_share,
+                bottom = text_grob("Prevailing household generation", vjust=-3.5,family = "Times", size="12"),
+)
+dev.off()
+
+savepdf("age_int_4")
+annotate_figure(figure_share,
+                #top = text_grob("Average triplength and region as predictors of car ownership", color = "black", size = 14, vjust=4),
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Prevailing household generation", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+```
+
+
+2.9 Households with children
+```{r}
+Plot.children0 <-ggplot(data=ef88, aes(x=hh_children, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      labs(color = "region")+
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+       ylab("")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      xlab("")+
+      ggtitle("Zero cars")+
+      coord_fixed(ratio=8)+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      scale_y_continuous(limits=c(0,0.25),breaks = c(0.1,0.2))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.children0
+
+Plot.children1 <-ggplot(data=ef88, aes(x=hh_children, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+       ylab("Predicted Probability")+
+      xlab("")+
+  labs(color = "Region:")+
+      ggtitle("One car")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=2)+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.children1
+
+Plot.children2 <-ggplot(data=ef88, aes(x=hh_children, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+       ylab("")+
+      xlab("")+
+      ggtitle("Two cars")+
+      coord_fixed(ratio=2)+
+  labs(color = "Region:")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.children2
+
+Plot.children3<-ggplot(data=ef88, aes(x=hh_children, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+       ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+  labs(color = "Region:")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=8)+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+ 
+      scale_y_continuous(limits=c(0,0.25),breaks = c(0.1,0.2))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.children3
+```
+
+```{r}
+figure_children <- ggarrange(Plot.children1, Plot.children2, common.legend = TRUE, legend = "right", vjust=8,
+          ncol = 2, nrow = 1)
+
+
+figure_children <- ggarrange(Plot.children0, Plot.children1, Plot.children2, Plot.children3,common.legend = TRUE, legend = "none",vjust=3,
+          ncol = 4, nrow = 1) %>% gridExtra::grid.arrange(get_legend(Plot.work3), heights = unit(c(50, 5), "mm"))
+
+annotate_figure(figure_children,
+                left = text_grob("Predicted Probability", color = "black", rot = 90),
+                bottom = text_grob("Household with children", vjust=-5),
+)
+
+savepdf("children_int_4")
+annotate_figure(figure_children,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Household with children", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+
+savepdf("children_int")
+annotate_figure(figure_children,
+                #top = text_grob("Average triplength and region as predictors of car ownership", color = "black", size = 14, vjust=4),
+                #left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Household with children", vjust=-1,family = "Times", size="12"),
+)
+dev.off()
+```
+
+
+2.10 Number of bikes
+```{r}
+Plot.ped0 <-ggplot(data=ef99, aes(x=numped, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("Zero cars")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+  labs(color = "Region:")+
+      coord_fixed(ratio=20)+
+      scale_y_continuous(limits=c(0,0.25),breaks = c(0.1,0.2))+
+   scale_x_continuous(limits=c(0,5),breaks = c(0,1,2,3,4,5))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.ped0
+
+Plot.ped1 <-ggplot(data=ef99, aes(x=numped, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("One car")+
+  labs(color = "Region:")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=5)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_continuous(limits=c(0,5),breaks = c(0,1,2,3,4,5))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.ped1
+
+Plot.ped2 <-ggplot(data=ef99, aes(x=numped, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("Two cars")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+  labs(color = "Region:")+
+      coord_fixed(ratio=5)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_continuous(limits=c(0,5),breaks = c(0,1,2,3,4,5))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.ped2
+
+Plot.ped3<-ggplot(data=ef99, aes(x=numped, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+  labs(color = "Region:")+
+      coord_fixed(ratio=20)+
+      scale_y_continuous(limits=c(0,0.25),breaks = c(0.1,0.2))+
+  scale_x_continuous(limits=c(0,5),breaks = c(0,1,2,3,4,5))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.ped3
+```
+
+```{r}
+figure_ped <- ggarrange(Plot.ped1, Plot.ped2, common.legend = TRUE, legend = "right", vjust=8,
+          ncol = 2, nrow = 1)
+
+figure_ped <- ggarrange(Plot.ped0, Plot.ped1, Plot.ped2,Plot.ped3,common.legend = TRUE, legend = "none",vjust=3,
+          ncol = 4, nrow = 1) %>% gridExtra::grid.arrange(get_legend(Plot.work3), heights = unit(c(50, 5), "mm"))
+
+
+annotate_figure(figure_ped,
+                left = text_grob("Predicted Probability", color = "black", rot = 90),
+                bottom = text_grob("Number of bicycles/pedelecs", vjust=-5),
+)
+
+savepdf("ped_int_4")
+annotate_figure(figure_ped,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Number of bikes/pedelecs", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+
+savepdf("ped_int")
+annotate_figure(figure_ped,
+                bottom = text_grob("Number of bikes/pedelecs", vjust=-1,family = "Times", size="12"),
+)
+dev.off()
+```
+
+2.11 Housing type
+
+```{r}
+Plot.housingtyp1 <-ggplot(data=ef133, aes(x=housing_type, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("Zero cars")+
+      coord_fixed(ratio=6)+
+      scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4))+
+  scale_x_discrete(limits=c("singlefamily_h","multifamily_h", "apartmentbuilding"),labels = c("singlefamily_h" = "Single-family home", "multifamily_h" = "Multi-family home","apartmentbuilding" = "Apartment"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+Plot.housingtyp2 <-ggplot(data=ef133, aes(x=housing_type, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("One car")+
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_discrete(limits=c("singlefamily_h","multifamily_h", "apartmentbuilding"),labels = c("singlefamily_h" = "Single-family home", "multifamily_h" = "Multi-family home","apartmentbuilding" = "Apartment"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+Plot.housingtyp3 <-ggplot(data=ef133, aes(x=housing_type, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+     labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Two cars")+
+      coord_fixed(ratio=3)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+scale_x_discrete(limits=c("singlefamily_h","multifamily_h", "apartmentbuilding"),labels = c("singlefamily_h" = "Single-family home", "multifamily_h" = "Multi-family home","apartmentbuilding" = "Apartment"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+Plot.housingtyp4 <-ggplot(data=ef133, aes(x=housing_type, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+     labs(color = "Region:") +
+  scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+      coord_fixed(ratio=6)+
+      scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4))+
+scale_x_discrete(limits=c("singlefamily_h","multifamily_h", "apartmentbuilding"),labels = c("singlefamily_h" = "Single-family home", "multifamily_h" = "Multi-family home","apartmentbuilding" = "Apartment"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+              axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+```
+
+```{r}
+figure_housing <- ggarrange(Plot.housingtyp1, Plot.housingtyp2, Plot.housingtyp3,common.legend = TRUE, legend = "none", vjust=6,
+          ncol = 3, nrow = 1, align = "h")%>% gridExtra::grid.arrange(get_legend(Plot.numlic3), heights = unit(c(68, 5), "mm"))
+
+figure_housing <- ggarrange(Plot.housingtyp1, Plot.housingtyp2, Plot.housingtyp3,Plot.housingtyp4,common.legend = TRUE, legend = "none",vjust=3,
+          ncol = 4, nrow = 1)%>% gridExtra::grid.arrange(get_legend(Plot.work3), heights = unit(c(70, 5), "mm"))
+
+annotate_figure(figure_housing,
+                left = text_grob("Predicted Probability", color = "black", rot = 90, hjust = 0.2),
+                bottom = text_grob("Type of housing", color = "black",vjust=-4)
+)
+
+savepdf6("housing_int_4")
+annotate_figure(figure_housing,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.2),
+                bottom = text_grob("Type of housing", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+
+savepdf6("housing_int")
+annotate_figure(figure_housing,
+                bottom = text_grob("Type of housing", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+
+```
+
+2.12 Availability of a garage
+```{r}
+Plot.garage1 <-ggplot(data=ef199, aes(x=garage, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+   scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Zero cars")+
+      coord_fixed(ratio=8)+
+      scale_y_continuous(limits=c(0,0.25),breaks = c(0.1,0.2))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+ 
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+Plot.garage2 <-ggplot(data=ef199, aes(x=garage, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+   scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("Predicted Probability")+
+      xlab("")+
+      ggtitle("One car")+
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+ 
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+Plot.garage3 <-ggplot(data=ef199, aes(x=garage, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+     labs(color = "Region:") +
+   scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Two cars")+
+      coord_fixed(ratio=2)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+ 
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+
+
+
+Plot.garage4 <-ggplot(data=ef199, aes(x=garage, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+   scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("Three cars")+
+      coord_fixed(ratio=8)+
+      scale_y_continuous(limits=c(0,0.25),breaks = c(0.1,0.2))+
+  scale_x_discrete(labels = c("0" = "No", "1" = "Yes"))+ 
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+```
+
+```{r}
+figure_garage <- ggarrange(Plot.garage2, Plot.garage3,common.legend = TRUE, legend = "right", vjust=8,
+          ncol = 2 , nrow = 1)
+
+annotate_figure(figure_garage,
+                left = text_grob("Predicted Probability", color = "black", rot = 90),
+                bottom = text_grob("Availability of a garage", vjust=-6),
+)
+
+figure_garage <- ggarrange(Plot.garage1, Plot.garage2, Plot.garage3,Plot.garage4, common.legend = TRUE, legend = "none", vjust=9,
+          ncol = 4, nrow = 1) %>% gridExtra::grid.arrange(get_legend(Plot.work3), heights = unit(c(50, 5), "mm"))
+
+annotate_figure(figure_garage,
+                left = text_grob("Predicted Probability", color = "black", rot = 90),
+                bottom = text_grob("Availabilty of a garage", color = "black",vjust=-6)
+)
+
+savepdf("garage_int_4")
+annotate_figure(figure_garage,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Availability of a garage", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+
+savepdf("garage_int")
+annotate_figure(figure_garage,
+                bottom = text_grob("Availability of a garage", vjust=-1,family = "Times", size="12"),
+)
+dev.off()
+
+```
+
+
+Not shown in thesis as no special differences in effects are visible regarding intercepts or slopes:
+
+2.12 Average number of trips
+```{r}
+Plot.tripsa0 <-ggplot(data=ef177, aes(x=tripsavg, group=region2, color=region2))+
+#For ylim, specify the range of your DV (in our case, 0-4)
+      #facet_wrap(~region2)+
+      geom_line(aes(y=prob.X0)) + 
+      #geom_line(aes(y=prob.X1, color="prob.X1")) + 
+      #geom_line(aes(y=prob.X2, color ="prob.X2"))+
+      #scale_color_manual(labels = c("0 car","1 car", "2 cars"),values= c("blue", "red", "orange"))+
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+      coord_fixed(ratio=16)+
+      scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.tripsa0
+
+Plot.tripsa1 <-ggplot(data=ef177, aes(x=tripsavg, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+      coord_fixed(ratio=8)+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.tripsa1
+
+
+Plot.tripsa2 <-ggplot(data=ef177, aes(x=tripsavg, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+      coord_fixed(ratio=8)+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.tripsa2
+
+Plot.tripsa3<-ggplot(data=ef177, aes(x=tripsavg, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+  coord_fixed(ratio=8)+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+               text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.tripsa3
+
+```
+
+```{r}
+figure_tripsavg <- ggarrange(Plot.tripsa0, Plot.tripsa1, Plot.tripsa2,Plot.tripsa3, common.legend = TRUE, legend = "none", vjust=9,
+          ncol = 4, nrow = 1) %>% gridExtra::grid.arrange(get_legend(Plot.work3), heights = unit(c(50, 5), "mm"))
+
+savepdf("tripsa_int_4")
+annotate_figure(figure_tripsavg,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Average number of trips", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+```
+
+2.13 Number of motorbikes
+
+```{r}
+Plot.mot0 <-ggplot(data=ef188, aes(x=nummots1, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+      coord_fixed(ratio=8)+
+      scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4,0.5))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank(),aspect.ratio=1)+
+      scale_fill_grey()
+#Plot.mot0
+
+Plot.mot1 <-ggplot(data=ef188, aes(x=nummots1, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ggtitle("")+
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+#Plot.csm1
+
+
+Plot.mot2 <-ggplot(data=ef188, aes(x=nummots1, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+#Plot.csm2
+
+Plot.mot3<-ggplot(data=ef188, aes(x=nummots1, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+  coord_fixed(ratio=4)+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.mot0
+Plot.mot1
+Plot.mot2
+Plot.mot3
+
+```
+
+```{r}
+figure_mot <- ggarrange(Plot.mot0, Plot.mot1, Plot.mot2,Plot.mot3,common.legend = TRUE, legend = "none",ncol = 4, nrow = 1)%>% gridExtra::grid.arrange(get_legend(Plot.work3), heights = unit(c(50, 5), "mm"))
+
+
+
+savepdf("mot_int_4")
+annotate_figure(figure_mot,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Number of motorbikes / mopeds", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+
+
+
+
+
+```
+2.14 Distance to the next train station
+
+```{r}
+Plot.train0 <-ggplot(data=ef155, aes(x=train28, group=region2, color=region2))+
+      geom_line(aes(y=prob.X0)) + 
+      geom_ribbon(aes(ymin=prob.X0-se.prob.X0, ymax=prob.X0+se.prob.X0),alpha=.2, linetype =0)+
+      labs(color = "Region:") +
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+      coord_fixed(ratio=8)+
+      scale_y_continuous(limits=c(0,0.5),breaks = c(0.1,0.2,0.3,0.4,0.5))+
+  scale_x_discrete(labels = c("near" = "< 0.5 km", "middle"="0.5 - 2.5 km","far"="2.5 - 5 km", "rfar" = "> 5 km"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+#Plot.mot0
+
+Plot.train1 <-ggplot(data=ef155, aes(x=train28, group=region2, color=region2))+
+      geom_line(aes(y=prob.X1)) + 
+      geom_ribbon(aes(ymin=prob.X1-se.prob.X1, ymax=prob.X1+se.prob.X1),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_discrete(labels = c("near" = "< 0.5 km", "middle"="0.5 - 2.5 km","far"="2.5 - 5 km", "rfar" = "> 5 km"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+#Plot.csm1
+
+
+Plot.train2 <-ggplot(data=ef155, aes(x=train28, group=region2, color=region2))+
+      geom_line(aes(y=prob.X2)) + 
+      geom_ribbon(aes(ymin=prob.X2-se.prob.X2, ymax=prob.X2+se.prob.X2),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      coord_fixed(ratio=4)+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_discrete(labels = c("near" = "< 0.5 km", "middle"="0.5 - 2.5 km","far"="2.5 - 5 km", "rfar" = "> 5 km"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+        axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+#Plot.csm2
+
+Plot.train3<-ggplot(data=ef155, aes(x=train28, group=region2, color=region2))+
+      geom_line(aes(y=prob.X3)) + 
+      geom_ribbon(aes(ymin=prob.X3-se.prob.X3, ymax=prob.X3+se.prob.X3),alpha=.2, linetype =0)+
+      ylab("")+
+      xlab("")+
+      ggtitle("")+
+  coord_fixed(ratio=4)+
+    scale_color_discrete(labels = c("Urban","Suburban", "Rural"))+
+      scale_y_continuous(limits=c(0,1),breaks = c(0.2,0.4,0.6,0.8))+
+  scale_x_discrete(labels = c("near" = "< 0.5 km", "middle"="0.5 - 2.5 km","far"="2.5 - 5 km", "rfar" = "> 5 km"))+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+              text=element_text(family="Times"),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        plot.title = element_text(size = 12),
+         axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()
+Plot.train0
+Plot.train1
+Plot.train2
+Plot.train3
+```
+```{r}
+figure_train <- ggarrange(Plot.train0, Plot.train1, Plot.train2,Plot.train3,common.legend = TRUE, legend = "none",ncol = 4, nrow = 1)%>% gridExtra::grid.arrange(get_legend(Plot.work3), heights = unit(c(70, 5), "mm"))
+
+savepdf6("train_int_4")
+annotate_figure(figure_train,
+                left = text_grob("Predicted Probability", color = "black", rot = 90,family = "Times", size="12", hjust=0.3),
+                bottom = text_grob("Distance to next train station in km", vjust=-4,family = "Times", size="12"),
+)
+dev.off()
+
+```
+
